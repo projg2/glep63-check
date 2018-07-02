@@ -234,6 +234,8 @@ def check_key(k):
 def main():
     argp = argparse.ArgumentParser()
     act = argp.add_mutually_exclusive_group(required=True)
+    act.add_argument('-a', '--all', action='store_true',
+            help='Verify all public keys in the local keyring')
     act.add_argument('-G', '--gnupg',
             nargs='+', metavar='FILE', type=argparse.FileType('r', encoding='UTF-8'),
             help='Process "gpg --with-colons" output from FILE(s) ("-" for stdin)')
@@ -249,8 +251,11 @@ def main():
 
     keys = []
 
-    if opts.key_id is not None:
-        s = subprocess.Popen(['gpg', '--with-colons', '--list-keys'] + opts.key_id,
+    if opts.key_id is not None or opts.all:
+        cmd = ['gpg', '--with-colons', '--list-keys']
+        if opts.key_id is not None:
+            cmd += opts.key_id
+        s = subprocess.Popen(cmd,
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE)
         sout = io.TextIOWrapper(s.stdout, encoding='UTF-8')
