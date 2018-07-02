@@ -197,7 +197,13 @@ def check_key(k):
         if sk.validity in (Validity.REVOKED, Validity.EXPIRED):
             continue
 
-        has_signing_subkey = True
+        if len(sk.key_caps) > 1:
+            out.append(SubKeyWarning(k, sk, 'subkey:multipurpose',
+                'Subkey has multiple capabilities enabled (has: [{}]; use dedicated subkeys!)'
+                .format(sk.key_caps)))
+        else:
+            has_signing_subkey = True
+
         out.extend(check_subkey(sk,
             issue_cls=functools.partial(SubKeyIssue, k, sk),
             warning_cls=functools.partial(SubKeyWarning, k, sk),
