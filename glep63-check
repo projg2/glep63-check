@@ -120,17 +120,17 @@ def check_subkey(k, issue_cls, warning_cls, recommended_expire, renewal):
                 .format(k.key_length)))
         else:
             out.append(warning_cls('algo:dsa:discouraged',
-                '4096-bit RSA key is recommended (DSA is being used)'))
+                'RSA key is recommended (DSA is being used)'))
     elif k.key_algo == KeyAlgo.RSA:
         # TODO: RSA version
         if k.key_length < 2048:
             out.append(issue_cls('algo:rsa:short',
-                'RSA key too short (has {} bits, should be 2048 bits, 4096 recommended)'
+                'RSA key too short (has {} bits, should be at least 2048 bits)'
                 .format(k.key_length)))
-        elif k.key_length < 4096:
-            out.append(warning_cls('algo:rsa:short',
-                '4096-bit RSA key is recommended ({} bits used)'
-                .format(k.key_length)))
+        #elif k.key_length < 4096:
+        #    out.append(warning_cls('algo:rsa:short',
+        #        '4096-bit RSA key is recommended ({} bits used)'
+        #        .format(k.key_length)))
     else:
         out.append(issue_cls('algo:invalid',
             'Unexpected key algorithm (RSA or DSA required)'))
