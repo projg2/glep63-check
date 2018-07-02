@@ -301,7 +301,9 @@ def main():
             msg = [keyid, i.machine_desc]
         else:
             # decorate with readable UID
-            uid = '[{}]'.format(i.key.uids[0].user_id)
+            sorted_uids = sorted(i.key.uids,
+                    key=lambda x: not '@gentoo.org' in x.user_id)
+            uid = '[{}]'.format(sorted_uids[0].user_id)
             msg = [keyid, uid, cls, i.machine_desc, i.long_desc]
 
         print(' '.join(msg))
