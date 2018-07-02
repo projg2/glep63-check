@@ -90,17 +90,17 @@ def process_gnupg_colons(f):
 
 
 KeyIssue = collections.namedtuple('KeyIssue',
-    ('keyid', 'machine_desc', 'long_desc'))
+    ('key', 'machine_desc', 'long_desc'))
 KeyWarning = collections.namedtuple('KeyWarning',
-    ('keyid', 'machine_desc', 'long_desc'))
+    ('key', 'machine_desc', 'long_desc'))
 
 SubKeyIssue = collections.namedtuple('SubKeyIssue',
-    ('keyid', 'subkey', 'machine_desc', 'long_desc'))
+    ('key', 'subkey', 'machine_desc', 'long_desc'))
 SubKeyWarning = collections.namedtuple('SubKeyWarning',
-    ('keyid', 'subkey', 'machine_desc', 'long_desc'))
+    ('key', 'subkey', 'machine_desc', 'long_desc'))
 
 UIDIssue = collections.namedtuple('UIDIssue',
-    ('keyid', 'uid', 'machine_desc', 'long_desc'))
+    ('key', 'uid', 'machine_desc', 'long_desc'))
 
 
 def check_subkey(k, issue_cls, warning_cls, recommended_expire, renewal):
@@ -137,7 +137,7 @@ def check_subkey(k, issue_cls, warning_cls, recommended_expire, renewal):
 
     # 2. key expiration
     if k.expiration_date is None:
-        out.append(KeyIssue(k.keyid, 'expire:none',
+        out.append(issue_cls('expire:none',
             'No expiration date on public key (<3 years recommended, 5 years max)'))
     else:
         expire_left = k.expiration_date - datetime.datetime.utcnow()
@@ -162,22 +162,22 @@ def check_key(k):
 
     # 0. check key validity (only for whole key)
     if k.validity == Validity.INVALID:
-        out.append(KeyIssue(k.keyid, 'validity:invalid',
+        out.append(KeyIssue(k, 'validity:invalid',
             'Public key is invalid'))
         return out
     elif k.validity == Validity.REVOKED:
-        out.append(KeyIssue(k.keyid, 'validity:revoked',
+        out.append(KeyIssue(k, 'validity:revoked',
             'Public key has been revoked'))
         return out
     elif k.validity == Validity.EXPIRED:
-        out.append(KeyIssue(k.keyid, 'validity:expired',
+        out.append(KeyIssue(k, 'validity:expired',
             'Public key has expired'))
         return out
 
     # 1. check public key
     out.extend(check_subkey(k,
-        issue_cls=functools.partial(KeyIssue, k.keyid),
-        warning_cls=functools.partial(KeyWarning, k.keyid),
+        issue_cls=functools.partial(KeyIssue, k),
+        warning_cls=functools.partial(KeyWarning, k),
         recommended_expire=3,
         renewal=1))
 
@@ -191,7 +191,7 @@ def check_key(k):
             continue
         # complain about invalid subkeys
         if sk.validity == Validity.INVALID:
-            out.append(SubKeyIssue(k.keyid, sk.keyid, 'validity:invalid',
+            out.append(SubKeyIssue(k, sk, 'validity:invalid',
                 'Subkey is invalid'))
         # skip expired and revoked subkeys
         if sk.validity in (Validity.REVOKED, Validity.EXPIRED):
@@ -199,13 +199,13 @@ def check_key(k):
 
         has_signing_subkey = True
         out.extend(check_subkey(sk,
-            issue_cls=functools.partial(SubKeyIssue, k.keyid, sk.keyid),
-            warning_cls=functools.partial(SubKeyWarning, k.keyid, sk.keyid),
+            issue_cls=functools.partial(SubKeyIssue, k, sk),
+            warning_cls=functools.partial(SubKeyWarning, k, sk),
             recommended_expire=1,
             renewal=0.5))
 
     if not has_signing_subkey:
-        out.append(KeyWarning(k.keyid, 'subkey:none',
+        out.append(KeyWarning(k, 'subkey:none',
             'Having a dedicated signing subkey is recommended'))
 
     # 3. check UIDs
@@ -214,7 +214,7 @@ def check_key(k):
     for u in k.uids:
         # complain about invalid UIDs
         if u.validity == Validity.INVALID:
-            out.append(UIDIssue(k.keyid, u.uid, 'validity:invalid',
+            out.append(UIDIssue(k, u, 'validity:invalid',
                 'UID is invalid'))
         # skip expired and revoked UIDs
         if u.validity in (Validity.REVOKED, Validity.EXPIRED):
@@ -225,7 +225,7 @@ def check_key(k):
             has_gentoo_uid = True
 
     if not has_gentoo_uid:
-        out.append(KeyWarning(k.keyid, 'uid:nogentoo',
+        out.append(KeyWarning(k, 'uid:nogentoo',
             '@gentoo.org e-mail not in key UIDs'))
 
     return out
@@ -272,11 +272,11 @@ def main():
 
     ret = 0
     for i in out:
-        keyid = i.keyid
+        keyid = i.key.keyid
         if hasattr(i, 'subkey'):
-            keyid += ':' + i.subkey
+            keyid += ':' + i.subkey.keyid
         elif hasattr(i, 'uid'):
-            keyid += ':[{}]'.format(i.user_id)
+            keyid += ':[{}]'.format(i.uid.user_id)
 
         msg = [keyid, i.machine_desc]
         if not opts.machine_readable:
