@@ -242,6 +242,8 @@ def main():
     act.add_argument('-k', '--key-id', nargs='+',
             help='Check local GnuPG keys matching specified query (IDs, names)')
 
+    argp.add_argument('-e', '--errors-only', action='store_true',
+            help='Print only errors (skip warnings)')
     argp.add_argument('-m', '--machine-readable', action='store_true',
             help='Print only machine-readable data (skip human-readable desc)')
     argp.add_argument('-w', '--warnings-as-errors', action='store_true',
@@ -284,6 +286,8 @@ def main():
             cls = '[E]'
         else:
             cls = '[W]'
+            if opts.errors_only:
+                continue
             if opts.warnings_as_errors:
                 ret |= 2
 
