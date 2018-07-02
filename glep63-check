@@ -205,8 +205,8 @@ def check_key(k):
             renewal=0.5))
 
     if not has_signing_subkey:
-        out.append(KeyWarning(k, 'subkey:none',
-            'Having a dedicated signing subkey is recommended'))
+        out.append(KeyIssue(k, 'subkey:none',
+            'Having a dedicated signing subkey is required'))
 
     # 3. check UIDs
     # (require the @gentoo.org e-mail)
