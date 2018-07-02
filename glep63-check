@@ -287,7 +287,8 @@ def main():
 
         print(' '.join(msg))
 
-        if isinstance(i, KeyIssue) or isinstance(i, SubKeyIssue):
+        if (isinstance(i, KeyIssue) or isinstance(i, SubKeyIssue)
+                or isinstance(i, UIDIssue)):
             ret = 1
         elif opts.warnings_as_errors:
             ret = 2
