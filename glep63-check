@@ -1,0 +1,222 @@
+#!/usr/bin/env python
+# Verify GLEP63 compliance of OpenPGP keys (using GnuPG).
+# (c) 2018 Michał Górny
+# Released under the terms of 2-clause BSD license.
+
+import argparse
+import collections
+import datetime
+import functools
+
+
+key_keys = ('validity', 'key_length', 'key_algo', 'keyid',
+            'creation_date', 'expiration_date', 'key_caps')
+
+# tuples for "gpg --with-colons" output
+Key = collections.namedtuple('Key', key_keys)
+PublicKey = collections.namedtuple('PublicKey',
+    key_keys + ('subkeys', 'uids'))
+UID = collections.namedtuple('UID',
+    ('validity', 'creation_date', 'expiration_date', 'uid_hash',
+     'user_id'))
+
+
+def process_date(d):
+    if d == '':
+        return None
+    elif 'T' in d:
+        return datetime.datetime.strptime(d, '%Y%m%dT%H%M%S')
+    else:
+        return datetime.datetime.utcfromtimestamp(int(d))
+
+
+def process_initial_key_fields(validity, key_length, key_algo, keyid,
+        creation_date, expiration_date):
+    return (
+        validity,
+        int(key_length),
+        int(key_algo),
+        keyid,
+        process_date(creation_date),
+        process_date(expiration_date),
+    )
+
+
+# gpg/openpgp consts
+class Validity(object):
+    INVALID = 'i'
+    REVOKED = 'r'
+    EXPIRED = 'e'
+
+
+class KeyAlgo(object):
+    RSA                 = 1
+    RSA_ENCRYPT_ONLY    = 2
+    RSA_SIGN_ONLY       = 3
+    ELGAMAL             = 16
+    DSA                 = 17
+
+
+def process_gnupg_colons(f):
+    """
+    Process "gpg --with-colons" output from stream @f, and into list
+    of key objects.
+    """
+
+    keys = []
+
+    for l in f:
+        vals = l.split(':')
+
+        # type of record
+        if vals[0] == 'pub':
+            keys.append(PublicKey(
+                *process_initial_key_fields(*vals[1:7]),
+                vals[11], [], []))
+        elif vals[0] == 'sub':
+            assert keys
+            keys[-1].subkeys.append(Key(
+                *process_initial_key_fields(*vals[1:7]), vals[11]))
+        elif vals[0] == 'uid':
+            assert keys
+            keys[-1].uids.append(UID(vals[1], process_date(vals[5]),
+                process_date(vals[6]), vals[7], vals[9]))
+
+    return keys
+
+
+KeyIssue = collections.namedtuple('KeyIssue',
+    ('keyid', 'machine_desc', 'long_desc'))
+KeyWarning = collections.namedtuple('KeyWarning',
+    ('keyid', 'machine_desc', 'long_desc'))
+
+SubKeyIssue = collections.namedtuple('SubKeyIssue',
+    ('keyid', 'subkey', 'machine_desc', 'long_desc'))
+SubKeyWarning = collections.namedtuple('SubKeyWarning',
+    ('keyid', 'subkey', 'machine_desc', 'long_desc'))
+
+
+def check_subkey(k, issue_cls, warning_cls, recommended_expire, renewal):
+    out = []
+
+    # 1. key algo/length
+    if k.key_algo in (KeyAlgo.RSA_SIGN_ONLY, KeyAlgo.RSA_ENCRYPT_ONLY):
+        out.append(warning_cls('algo:rsa:deprecated_only',
+            'Sign-only/encrypt-only RSA keys are deprecated'))
+        # set to common value for simplicity
+        k.key_algo = KeyAlgo.RSA
+
+    if k.key_algo in (KeyAlgo.DSA, KeyAlgo.ELGAMAL):
+        if k.key_length < 2048:
+            out.append(issue_cls('algo:dsa:short',
+                'DSA key too short (has {} bits, should be 2048 bits)'
+                .format(k.key_length)))
+        else:
+            out.append(warning_cls('algo:dsa:discouraged',
+                '4096-bit RSA key is recommended (DSA is being used)'))
+    elif k.key_algo == KeyAlgo.RSA:
+        # TODO: RSA version
+        if k.key_length < 2048:
+            out.append(issue_cls('algo:rsa:short',
+                'RSA key too short (has {} bits, should be 2048 bits, 4096 recommended)'
+                .format(k.key_length)))
+        elif k.key_length < 4096:
+            out.append(warning_cls('algo:rsa:short',
+                '4096-bit RSA key is recommended ({} bits used)'
+                .format(k.key_length)))
+    else:
+        out.append(issue_cls('algo:invalid',
+            'Unexpected key algorithm (RSA or DSA required)'))
+
+    # 2. key expiration
+    if k.expiration_date is None:
+        out.append(keyIssue(k.keyid, 'expire:none',
+            'No expiration date on public key (<3 years recommended, 5 years max)'))
+    else:
+        expire_left = k.expiration_date - datetime.datetime.utcnow()
+        if expire_left.days > 5*365.2425:
+            out.append(issue_cls('expire:long',
+                'Expiration date is too long (is {}, <3 years recommended, 5 years max)'
+                .format(k.expiration_date)))
+        elif expire_left.days > recommended_expire*365.2425:
+            out.append(warning_cls('expire:long',
+                'Expiration date is long (is {}, <{} years recommended)'
+                .format(k.expiration_date, recommended_expire)))
+        elif expire_left.days < renewal*365.2425:
+            out.append(warning_cls('expire:short',
+                'Expiration date is short (is {}, renewal every {} months recommended)'
+                .format(k.expiration_date, renewal*12)))
+
+    return out
+
+
+def check_key(k):
+    out = []
+
+    # 0. check key validity (only for whole key)
+    if k.validity == Validity.INVALID:
+        out.append(KeyIssue(k.keyid, 'validity:invalid',
+            'Public key is invalid'))
+        return out
+    elif k.validity == Validity.REVOKED:
+        out.append(KeyIssue(k.keyid, 'validity:revoked',
+            'Public key has been revoked'))
+        return out
+    elif k.validity == Validity.EXPIRED:
+        out.append(KeyIssue(k.keyid, 'validity:expired',
+            'Public key has expired'))
+        return out
+
+    # 1. check public key
+    out.extend(check_subkey(k,
+        issue_cls=functools.partial(KeyIssue, k.keyid),
+        warning_cls=functools.partial(KeyWarning, k.keyid),
+        recommended_expire=3,
+        renewal=1))
+
+    # 2. check subkeys
+    # (sadly, we can't be sure *which* subkey is used for Gentoo,
+    #  so we complain about all of them)
+    has_signing_subkey = False
+    for sk in k.subkeys:
+        # check only signing subkeys
+        if 's' not in sk.key_caps:
+            continue
+        # complain about invalid subkeys
+        if sk.validity == Validity.INVALID:
+            out.append(SubKeyIssue(k.keyid, sk.keyid, 'validity:invalid',
+                'Subkey is invalid'))
+        # skip expired and revoked subkeys
+        if sk.validity in (Validity.REVOKED, Validity.EXPIRED):
+            continue
+
+        has_signing_subkey = True
+        out.extend(check_subkey(sk,
+            issue_cls=functools.partial(SubKeyIssue, k.keyid, sk.keyid),
+            warning_cls=functools.partial(SubKeyWarning, k.keyid, sk.keyid),
+            recommended_expire=1,
+            renewal=0.5))
+
+    if not has_signing_subkey:
+        out.append(KeyWarning(k.keyid, 'subkey:none',
+            'Having a dedicated signing subkey is recommended'))
+
+    return out
+
+
+def main():
+    argp = argparse.ArgumentParser()
+    act = argp.add_mutually_exclusive_group(required=True)
+    act.add_argument('-G', '--gnupg',
+            nargs='+', metavar='FILE', type=argparse.FileType('r', encoding='UTF-8'),
+            help='Process "gpg --with-colons" output from FILE(s) ("-" for stdin)')
+    opts = argp.parse_args()
+
+    for f in opts.gnupg:
+        keys = process_gnupg_colons(f)
+        for k in keys:
+            print(check_key(k))
+
+
+if __name__ == '__main__':
+    main()
