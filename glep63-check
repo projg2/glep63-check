@@ -6,6 +6,7 @@
 import argparse
 import collections
 import datetime
+import email.utils
 import functools
 import io
 import subprocess
@@ -203,6 +204,18 @@ def check_key(k):
     if not has_signing_subkey:
         out.append(KeyWarning(k.keyid, 'subkey:none',
             'Having a dedicated signing subkey is recommended'))
+
+    # 3. check UIDs
+    # (require the @gentoo.org e-mail)
+    has_gentoo_uid = False
+    for u in k.uids:
+        name, addr = email.utils.parseaddr(u.user_id)
+        if addr.endswith('@gentoo.org'):
+            has_gentoo_uid = True
+
+    if not has_gentoo_uid:
+        out.append(KeyWarning(k.keyid, 'uid:nogentoo',
+            '@gentoo.org e-mail not in key UIDs'))
 
     return out
 
