@@ -278,6 +278,12 @@ def main():
         elif hasattr(i, 'uid'):
             keyid += ':[{}]'.format(i.uid.user_id)
 
+        if (isinstance(i, KeyIssue) or isinstance(i, SubKeyIssue)
+                or isinstance(i, UIDIssue)):
+            ret = 1
+        elif opts.warnings_as_errors:
+            ret = 2
+
         if opts.machine_readable:
             msg = [keyid, i.machine_desc]
         else:
@@ -286,12 +292,6 @@ def main():
             msg = [keyid, uid, i.machine_desc, i.long_desc]
 
         print(' '.join(msg))
-
-        if (isinstance(i, KeyIssue) or isinstance(i, SubKeyIssue)
-                or isinstance(i, UIDIssue)):
-            ret = 1
-        elif opts.warnings_as_errors:
-            ret = 2
 
     return ret
 
