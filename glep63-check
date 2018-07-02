@@ -99,6 +99,9 @@ SubKeyIssue = collections.namedtuple('SubKeyIssue',
 SubKeyWarning = collections.namedtuple('SubKeyWarning',
     ('keyid', 'subkey', 'machine_desc', 'long_desc'))
 
+UIDIssue = collections.namedtuple('UIDIssue',
+    ('keyid', 'uid', 'machine_desc', 'long_desc'))
+
 
 def check_subkey(k, issue_cls, warning_cls, recommended_expire, renewal):
     out = []
@@ -209,6 +212,14 @@ def check_key(k):
     # (require the @gentoo.org e-mail)
     has_gentoo_uid = False
     for u in k.uids:
+        # complain about invalid UIDs
+        if u.validity == Validity.INVALID:
+            out.append(UIDIssue(k.keyid, u.uid, 'validity:invalid',
+                'UID is invalid'))
+        # skip expired and revoked UIDs
+        if u.validity in (Validity.REVOKED, Validity.EXPIRED):
+            continue
+
         name, addr = email.utils.parseaddr(u.user_id)
         if addr.endswith('@gentoo.org'):
             has_gentoo_uid = True
