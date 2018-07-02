@@ -275,6 +275,8 @@ def main():
         keyid = i.keyid
         if hasattr(i, 'subkey'):
             keyid += ':' + i.subkey
+        elif hasattr(i, 'uid'):
+            keyid += ':[{}]'.format(i.user_id)
 
         msg = [keyid, i.machine_desc]
         if not opts.machine_readable:
