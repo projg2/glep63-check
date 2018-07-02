@@ -137,7 +137,7 @@ def check_subkey(k, issue_cls, warning_cls, recommended_expire, renewal):
 
     # 2. key expiration
     if k.expiration_date is None:
-        out.append(keyIssue(k.keyid, 'expire:none',
+        out.append(KeyIssue(k.keyid, 'expire:none',
             'No expiration date on public key (<3 years recommended, 5 years max)'))
     else:
         expire_left = k.expiration_date - datetime.datetime.utcnow()
