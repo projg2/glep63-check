@@ -210,12 +210,28 @@ def main():
     act.add_argument('-G', '--gnupg',
             nargs='+', metavar='FILE', type=argparse.FileType('r', encoding='UTF-8'),
             help='Process "gpg --with-colons" output from FILE(s) ("-" for stdin)')
+
+    argp.add_argument('-m', '--machine-readable', action='store_true',
+            help='Print only machine-readable data (skip human-readable desc)')
+
     opts = argp.parse_args()
+
+    out = []
 
     for f in opts.gnupg:
         keys = process_gnupg_colons(f)
         for k in keys:
-            print(check_key(k))
+            out.extend(check_key(k))
+
+    for i in out:
+        keyid = i.keyid
+        if hasattr(i, 'subkey'):
+            keyid += ':' + i.subkey
+
+        msg = [keyid, i.machine_desc]
+        if not opts.machine_readable:
+            msg += [i.long_desc]
+        print(' '.join(msg))
 
 
 if __name__ == '__main__':
