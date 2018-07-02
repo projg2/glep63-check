@@ -138,13 +138,14 @@ def check_subkey(k, issue_cls, warning_cls, recommended_expire, renewal):
     # 2. key expiration
     if k.expiration_date is None:
         out.append(issue_cls('expire:none',
-            'No expiration date on public key (<3 years recommended, 5 years max)'))
+            'No expiration date on public key (<{} years recommended, 5 years max)'
+            .format(recommended_expire)))
     else:
         expire_left = k.expiration_date - datetime.datetime.utcnow()
         if expire_left.days > 5*365.2425:
             out.append(issue_cls('expire:long',
-                'Expiration date is too long (is {}, <3 years recommended, 5 years max)'
-                .format(k.expiration_date)))
+                'Expiration date is too long (is {}, <{} years recommended, 5 years max)'
+                .format(k.expiration_date, recommended_expire)))
         elif expire_left.days > recommended_expire*365.2425:
             out.append(warning_cls('expire:long',
                 'Expiration date is long (is {}, <{} years recommended)'
