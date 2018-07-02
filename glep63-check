@@ -281,15 +281,18 @@ def main():
         if (isinstance(i, KeyIssue) or isinstance(i, SubKeyIssue)
                 or isinstance(i, UIDIssue)):
             ret |= 1
-        elif opts.warnings_as_errors:
-            ret |= 2
+            cls = '[E]'
+        else:
+            cls = '[W]'
+            if opts.warnings_as_errors:
+                ret |= 2
 
         if opts.machine_readable:
             msg = [keyid, i.machine_desc]
         else:
             # decorate with readable UID
             uid = '[{}]'.format(i.key.uids[0].user_id)
-            msg = [keyid, uid, i.machine_desc, i.long_desc]
+            msg = [keyid, uid, cls, i.machine_desc, i.long_desc]
 
         print(' '.join(msg))
 
