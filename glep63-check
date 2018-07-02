@@ -7,6 +7,8 @@ import argparse
 import collections
 import datetime
 import functools
+import io
+import subprocess
 
 
 key_keys = ('validity', 'key_length', 'key_algo', 'keyid',
@@ -210,18 +212,31 @@ def main():
     act.add_argument('-G', '--gnupg',
             nargs='+', metavar='FILE', type=argparse.FileType('r', encoding='UTF-8'),
             help='Process "gpg --with-colons" output from FILE(s) ("-" for stdin)')
+    act.add_argument('-k', '--key-id', nargs='+',
+            help='Check local GnuPG keys matching specified query (IDs, names)')
 
     argp.add_argument('-m', '--machine-readable', action='store_true',
             help='Print only machine-readable data (skip human-readable desc)')
 
     opts = argp.parse_args()
 
-    out = []
+    keys = []
 
-    for f in opts.gnupg:
-        keys = process_gnupg_colons(f)
-        for k in keys:
-            out.extend(check_key(k))
+    if opts.key_id is not None:
+        s = subprocess.Popen(['gpg', '--with-colons', '--list-keys'] + opts.key_id,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE)
+        sout = io.TextIOWrapper(s.stdout, encoding='UTF-8')
+        keys = process_gnupg_colons(sout)
+        if s.wait() != 0:
+            print('Warning: GnuPG exited unnecessfully!')
+    elif opts.gnupg is not None:
+        for f in opts.gnupg:
+            keys.extend(process_gnupg_colons(f))
+
+    out = []
+    for k in keys:
+        out.extend(check_key(k))
 
     for i in out:
         keyid = i.keyid
