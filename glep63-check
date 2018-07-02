@@ -278,9 +278,13 @@ def main():
         elif hasattr(i, 'uid'):
             keyid += ':[{}]'.format(i.uid.user_id)
 
-        msg = [keyid, i.machine_desc]
-        if not opts.machine_readable:
-            msg += [i.long_desc]
+        if opts.machine_readable:
+            msg = [keyid, i.machine_desc]
+        else:
+            # decorate with readable UID
+            uid = '[{}]'.format(i.key.uids[0].user_id)
+            msg = [keyid, uid, i.machine_desc, i.long_desc]
+
         print(' '.join(msg))
 
         if isinstance(i, KeyIssue) or isinstance(i, SubKeyIssue):
