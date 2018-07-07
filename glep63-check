@@ -75,12 +75,12 @@ def process_gnupg_colons(f):
         # type of record
         if vals[0] == 'pub':
             keys.append(PublicKey(
-                *process_initial_key_fields(*vals[1:7]),
-                vals[11], [], []))
+                *process_initial_key_fields(*vals[1:7]) +
+                (vals[11], [], [])))
         elif vals[0] == 'sub':
             assert keys
             keys[-1].subkeys.append(Key(
-                *process_initial_key_fields(*vals[1:7]), vals[11]))
+                *(process_initial_key_fields(*vals[1:7]) + (vals[11],))))
         elif vals[0] == 'uid':
             assert keys
             keys[-1].uids.append(UID(vals[1], process_date(vals[5]),
