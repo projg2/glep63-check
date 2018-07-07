@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Verify GLEP63 compliance of OpenPGP keys (using GnuPG).
 # (c) 2018 Michał Górny
 # Released under the terms of 2-clause BSD license.
