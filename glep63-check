@@ -77,6 +77,67 @@ UIDIssue = collections.namedtuple('UIDIssue',
     ('key', 'uid', 'machine_desc', 'long_desc'))
 
 
+IssueClasses = collections.namedtuple('IssueClasses',
+    ('key', 'subkey', 'uid'))
+
+
+FAIL = IssueClasses(KeyIssue, SubKeyIssue, UIDIssue)
+WARN = IssueClasses(KeyWarning, SubKeyWarning, None)
+
+
+class Years(object):
+    def __init__(self, val):
+        self.years = val
+
+    @property
+    def days(self):
+        return self.years * 365.24
+
+    def __str__(self):
+        return '{} years'.format(self.years)
+
+
+class Days(object):
+    def __init__(self, val):
+        self.days = val
+
+    def __str__(self):
+        return '{} days'.format(self.days)
+
+
+GLEP63_1_RSA2048 = {
+    '__doc__': 'GLEP 63 v1 without RSA4096 preference',
+    # DSA key algorithm
+    'algo:dsa': WARN,
+    'algo:dsa:minlength': 2048,
+    # RSA key algorithm
+    'algo:rsa:minlength': 2048,
+    # other algorithms
+    'algo:invalid': FAIL,
+    # expiration max values (fatal)
+    'expire:max:key': Years(5),
+    'expire:max:subkey': Years(5),
+    # expiration recommended values (warning)
+    'expire:recommended:key': Years(3),
+    'expire:recommended:subkey': Years(1),
+    # renewal
+    'expire:short': WARN,
+    'expire:short:length': Days(14),
+    # multipurpose subkeys
+    'subkey:multipurpose': WARN,
+    # lack of signing subkey
+    'subkey:none': FAIL,
+    # lack of @gentoo.org UID
+    'uid:nogentoo': WARN,
+}
+
+SPECS = {
+    'glep63-1-rsa2048': GLEP63_1_RSA2048,
+}
+
+DEFAULT_SPEC = 'glep63-1-rsa2048'
+
+
 def process_gnupg_colons(f):
     """
     Process "gpg --with-colons" output from stream @f, and into list
@@ -105,8 +166,11 @@ def process_gnupg_colons(f):
     return keys
 
 
-def check_subkey(k, issue_cls, warning_cls, recommended_expire):
+def check_subkey(k, spec, key_type, issue_params):
     out = []
+
+    issue_cls = functools.partial(getattr(FAIL, key_type), *issue_params)
+    warning_cls = functools.partial(getattr(WARN, key_type), *issue_params)
 
     # 1. key algo/length
     if k.key_algo in (KeyAlgo.RSA_SIGN_ONLY, KeyAlgo.RSA_ENCRYPT_ONLY):
@@ -116,46 +180,66 @@ def check_subkey(k, issue_cls, warning_cls, recommended_expire):
         k.key_algo = KeyAlgo.RSA
 
     if k.key_algo in (KeyAlgo.DSA, KeyAlgo.ELGAMAL):
-        if k.key_length < 2048:
+        dsa_key = spec.get('algo:dsa')
+        if dsa_key == FAIL:
+            out.append(issue_cls('algo:dsa',
+                'DSA keys are disallowed (RSA is recommended)'))
+        elif k.key_length < spec.get('algo:dsa:minlength', 0):
             out.append(issue_cls('algo:dsa:short',
-                'DSA key too short (has {} bits, should be 2048 bits)'
-                .format(k.key_length)))
-        else:
+                'DSA key too short (has {} bits, should be {} bits)'
+                .format(k.key_length, spec['algo:dsa:minlength'])))
+        elif dsa_key == WARN:
             out.append(warning_cls('algo:dsa:discouraged',
-                'RSA key is recommended (DSA is being used)'))
+                'DSA keys are discouraged (RSA is recommended)'))
     elif k.key_algo == KeyAlgo.RSA:
-        if k.key_length < 2048:
+        rsa_key = spec.get('algo:rsa')
+        # we currently don't have to implement forbidding RSA ;-)
+        assert not rsa_key
+        if k.key_length < spec.get('algo:rsa:minlength', 0):
             out.append(issue_cls('algo:rsa:short',
-                'RSA key too short (has {} bits, should be at least 2048 bits)'
-                .format(k.key_length)))
-    else:
+                'RSA key too short (has {} bits, should be at least {} bits)'
+                .format(k.key_length, spec['algo:rsa:minlength'])))
+    elif spec.get('algo:invalid'):
+        cls = issue_cls if spec['algo:invalid'] == FAIL else warning_cls
         out.append(issue_cls('algo:invalid',
-            'Unexpected key algorithm (RSA or DSA required)'))
+            'Unexpected key algorithm'))
 
     # 2. key expiration
-    if k.expiration_date is None:
-        out.append(issue_cls('expire:none',
-            'No expiration date on public key (<{} years recommended, 5 years max)'
-            .format(recommended_expire)))
-    else:
-        expire_left = k.expiration_date - datetime.datetime.utcnow()
-        if expire_left.days > 5*365.2425:
-            out.append(issue_cls('expire:long',
-                'Expiration date is too long (is {}, <{} years recommended, 5 years max)'
-                .format(k.expiration_date, recommended_expire)))
-        elif expire_left.days > recommended_expire*365.2425:
-            out.append(warning_cls('expire:long',
-                'Expiration date is long (is {}, <{} years recommended)'
-                .format(k.expiration_date, recommended_expire)))
-        elif expire_left.days < 14:
-            out.append(warning_cls('expire:short',
-                'Expiration date is short (is {}, less than 2 weeks)'
-                .format(k.expiration_date)))
+    expire_max = spec.get('expire:max:{}'.format(key_type))
+    expire_recommended = spec.get('expire:recommended:{}'.format(key_type))
+    if expire_max is not None or expire_recommended is not None:
+        if expire_recommended is not None:
+            expire_str = ('<{} recommended, {} max'
+                    .format(expire_recommended, expire_max))
+        else:
+            expire_str = '{} max'.format(expire_max)
+
+        if k.expiration_date is None:
+            cls = issue_cls if expire_max is not None else warning_cls
+            out.append(cls('expire:none',
+                'No expiration date on public key ({})'.format(expire_str)))
+        else:
+            expire_left = k.expiration_date - datetime.datetime.utcnow()
+            if expire_max is not None and expire_left.days > expire_max.days:
+                out.append(issue_cls('expire:long',
+                    'Expiration date is too long (is {}, {})'
+                    .format(k.expiration_date, expire_str)))
+            elif (expire_recommended is not None
+                    and expire_left.days > expire_recommended.days):
+                out.append(warning_cls('expire:long',
+                    'Expiration date is long (is {}, {})'
+                    .format(k.expiration_date, expire_str)))
+            elif (spec.get('expire:short') is not None
+                    and expire_left.days < spec['expire:short:length'].days):
+                cls = issue_cls if spec['expire:short'] == FAIL else warning_cls
+                out.append(cls('expire:short',
+                    'Expiration date is short (is {}, less than {})'
+                    .format(k.expiration_date, spec['expire:short:length'])))
 
     return out
 
 
-def check_key(k):
+def check_key(k, spec):
     out = []
 
     # 0. check key validity (only for whole key)
@@ -173,10 +257,7 @@ def check_key(k):
         return out
 
     # 1. check public key
-    out.extend(check_subkey(k,
-        issue_cls=functools.partial(KeyIssue, k),
-        warning_cls=functools.partial(KeyWarning, k),
-        recommended_expire=3))
+    out.extend(check_subkey(k, spec, 'key', (k,)))
 
     # 2. check subkeys
     # (sadly, we can't be sure *which* subkey is used for Gentoo,
@@ -194,20 +275,17 @@ def check_key(k):
         if sk.validity in (Validity.REVOKED, Validity.EXPIRED):
             continue
 
-        if len(sk.key_caps) > 1:
-            out.append(SubKeyWarning(k, sk, 'subkey:multipurpose',
+        if len(sk.key_caps) > 1 and spec.get('subkey:multipurpose'):
+            out.append(spec['subkey:multipurpose'].subkey(k, sk, 'subkey:multipurpose',
                 'Subkey has multiple capabilities enabled (has: [{}]; use dedicated subkeys!)'
                 .format(sk.key_caps)))
         else:
             has_signing_subkey = True
 
-        out.extend(check_subkey(sk,
-            issue_cls=functools.partial(SubKeyIssue, k, sk),
-            warning_cls=functools.partial(SubKeyWarning, k, sk),
-            recommended_expire=1))
+        out.extend(check_subkey(sk, spec, 'subkey', (k, sk)))
 
-    if not has_signing_subkey:
-        out.append(KeyIssue(k, 'subkey:none',
+    if not has_signing_subkey and spec.get('subkey:none'):
+        out.append(spec['subkey:none'].key(k, 'subkey:none',
             'Having a dedicated signing subkey is required'))
 
     # 3. check UIDs
@@ -226,8 +304,8 @@ def check_key(k):
         if addr.endswith('@gentoo.org'):
             has_gentoo_uid = True
 
-    if not has_gentoo_uid:
-        out.append(KeyWarning(k, 'uid:nogentoo',
+    if not has_gentoo_uid and spec.get('uid:nogentoo'):
+        out.append(spec['uid:nogentoo'].key(k, 'uid:nogentoo',
             '@gentoo.org e-mail not in key UIDs'))
 
     return out
@@ -246,6 +324,8 @@ def main():
     act.add_argument('-K', '--keyring', nargs='+',
             help='Check all keys in specified keyrings (gpg --keyring syntax)')
 
+    argp.add_argument('-S', '--spec', choices=SPECS, default=DEFAULT_SPEC,
+            help='Spec to verify against')
     argp.add_argument('-e', '--errors-only', action='store_true',
             help='Print only errors (skip warnings)')
     argp.add_argument('-m', '--machine-readable', action='store_true',
@@ -278,7 +358,7 @@ def main():
 
     out = []
     for k in keys:
-        out.extend(check_key(k))
+        out.extend(check_key(k, SPECS[opts.spec]))
 
     ret = 0
     for i in out:
@@ -288,11 +368,11 @@ def main():
         elif hasattr(i, 'uid'):
             keyid += ':[{}]'.format(i.uid.user_id)
 
-        if (isinstance(i, KeyIssue) or isinstance(i, SubKeyIssue)
-                or isinstance(i, UIDIssue)):
+        if type(i) in FAIL:
             ret |= 1
             cls = '[E]'
         else:
+            assert type(i) in WARN
             cls = '[W]'
             if opts.errors_only:
                 continue
