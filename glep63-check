@@ -131,8 +131,16 @@ GLEP63_1_RSA2048 = {
     'uid:nogentoo': WARN,
 }
 
+GLEP63_1_STRICT = GLEP63_1_RSA2048.copy()
+GLEP63_1_STRICT.update({
+    '__doc__': 'GLEP 63 v1 with RSA4096 preference',
+    # RSA key algorithm
+    'algo:rsa:recommended': 4096,
+})
+
 SPECS = {
     'glep63-1-rsa2048': GLEP63_1_RSA2048,
+    'glep63-1-strict': GLEP63_1_STRICT,
 }
 
 DEFAULT_SPEC = 'glep63-1-rsa2048'
@@ -185,7 +193,7 @@ def check_subkey(k, spec, key_type, issue_params):
             out.append(issue_cls('algo:dsa',
                 'DSA keys are disallowed (RSA is recommended)'))
         elif k.key_length < spec.get('algo:dsa:minlength', 0):
-            out.append(issue_cls('algo:dsa:short',
+            out.append(issue_cls('algo:dsa:tooshort',
                 'DSA key too short (has {} bits, should be {} bits)'
                 .format(k.key_length, spec['algo:dsa:minlength'])))
         elif dsa_key == WARN:
@@ -196,9 +204,13 @@ def check_subkey(k, spec, key_type, issue_params):
         # we currently don't have to implement forbidding RSA ;-)
         assert not rsa_key
         if k.key_length < spec.get('algo:rsa:minlength', 0):
-            out.append(issue_cls('algo:rsa:short',
+            out.append(issue_cls('algo:rsa:tooshort',
                 'RSA key too short (has {} bits, should be at least {} bits)'
                 .format(k.key_length, spec['algo:rsa:minlength'])))
+        elif k.key_length < spec.get('algo:rsa:recommended', 0):
+            out.append(warning_cls('algo:rsa:short',
+                'RSA key short (has {} bits, {} bits recommended)'
+                .format(k.key_length, spec['algo:rsa:recommended'])))
     elif spec.get('algo:invalid'):
         cls = issue_cls if spec['algo:invalid'] == FAIL else warning_cls
         out.append(issue_cls('algo:invalid',
