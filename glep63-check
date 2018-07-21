@@ -61,6 +61,22 @@ class KeyAlgo(object):
     DSA                 = 17
 
 
+KeyIssue = collections.namedtuple('KeyIssue',
+    ('key', 'machine_desc', 'long_desc'))
+KeyWarning = collections.namedtuple('KeyWarning',
+    ('key', 'machine_desc', 'long_desc'))
+
+
+SubKeyIssue = collections.namedtuple('SubKeyIssue',
+    ('key', 'subkey', 'machine_desc', 'long_desc'))
+SubKeyWarning = collections.namedtuple('SubKeyWarning',
+    ('key', 'subkey', 'machine_desc', 'long_desc'))
+
+
+UIDIssue = collections.namedtuple('UIDIssue',
+    ('key', 'uid', 'machine_desc', 'long_desc'))
+
+
 def process_gnupg_colons(f):
     """
     Process "gpg --with-colons" output from stream @f, and into list
@@ -87,20 +103,6 @@ def process_gnupg_colons(f):
                 process_date(vals[6]), vals[7], vals[9]))
 
     return keys
-
-
-KeyIssue = collections.namedtuple('KeyIssue',
-    ('key', 'machine_desc', 'long_desc'))
-KeyWarning = collections.namedtuple('KeyWarning',
-    ('key', 'machine_desc', 'long_desc'))
-
-SubKeyIssue = collections.namedtuple('SubKeyIssue',
-    ('key', 'subkey', 'machine_desc', 'long_desc'))
-SubKeyWarning = collections.namedtuple('SubKeyWarning',
-    ('key', 'subkey', 'machine_desc', 'long_desc'))
-
-UIDIssue = collections.namedtuple('UIDIssue',
-    ('key', 'uid', 'machine_desc', 'long_desc'))
 
 
 def check_subkey(k, issue_cls, warning_cls, recommended_expire):
