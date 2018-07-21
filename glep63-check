@@ -14,7 +14,8 @@ import sys
 
 
 key_keys = ('validity', 'key_length', 'key_algo', 'keyid',
-            'creation_date', 'expiration_date', 'key_caps')
+            'creation_date', 'expiration_date', 'key_caps',
+            'curve')
 
 # tuples for "gpg --with-colons" output
 Key = collections.namedtuple('Key', key_keys)
@@ -59,6 +60,9 @@ class KeyAlgo(object):
     RSA_SIGN_ONLY       = 3
     ELGAMAL             = 16
     DSA                 = 17
+    ECDH                = 18
+    ECDSA               = 19
+    EDDSA               = 22
 
 
 KeyIssue = collections.namedtuple('KeyIssue',
@@ -112,6 +116,8 @@ GLEP63_1_RSA2048 = {
     'algo:dsa:minlength': 2048,
     # RSA key algorithm
     'algo:rsa:minlength': 2048,
+    # EC25519 algorithm
+    'algo:ec25519': FAIL,
     # other algorithms
     'algo:invalid': FAIL,
     # expiration max values (fatal)
@@ -138,9 +144,42 @@ GLEP63_1_STRICT.update({
     'algo:rsa:recommended': 4096,
 })
 
+GLEP63_1_RSA2048_EC25519 = GLEP63_1_RSA2048.copy()
+GLEP63_1_RSA2048_EC25519.update({
+    '__doc__': 'GLEP 63 v1 with RSA2048 preference and allowed EC25519',
+    # EC25519 algorithm
+    'algo:ec25519': None,
+})
+
+GLEP63_2_DRAFT_20180707 = {
+    '__doc__': 'GLEP 63 v2 draft as of 2018-07-07',
+    # DSA key algorithm
+    'algo:dsa': FAIL,
+    # RSA key algorithm
+    'algo:rsa:minlength': 2048,
+    # EC25519 algorithm
+    'algo:ec25519': None,
+    # other algorithms
+    'algo:invalid': FAIL,
+    # expiration max values (fatal)
+    'expire:max:key': Days(900),
+    'expire:max:subkey': Days(900),
+    # renewal
+    'expire:short': FAIL,
+    'expire:short:length': Days(14),
+    # multipurpose subkeys
+    'subkey:multipurpose': WARN,
+    # lack of signing subkey
+    'subkey:none': FAIL,
+    # lack of @gentoo.org UID
+    'uid:nogentoo': WARN,
+}
+
 SPECS = {
     'glep63-1-rsa2048': GLEP63_1_RSA2048,
     'glep63-1-strict': GLEP63_1_STRICT,
+    'glep63-1-rsa2048-ec25519': GLEP63_1_RSA2048_EC25519,
+    'glep63-2-draft-20180707': GLEP63_2_DRAFT_20180707,
 }
 
 DEFAULT_SPEC = 'glep63-1-rsa2048'
@@ -161,11 +200,12 @@ def process_gnupg_colons(f):
         if vals[0] == 'pub':
             keys.append(PublicKey(
                 *process_initial_key_fields(*vals[1:7]) +
-                (vals[11], [], [])))
+                (vals[11], vals[16], [], [])))
         elif vals[0] == 'sub':
             assert keys
             keys[-1].subkeys.append(Key(
-                *(process_initial_key_fields(*vals[1:7]) + (vals[11],))))
+                *(process_initial_key_fields(*vals[1:7]) +
+                (vals[11], vals[16]))))
         elif vals[0] == 'uid':
             assert keys
             keys[-1].uids.append(UID(vals[1], process_date(vals[5]),
@@ -211,6 +251,20 @@ def check_subkey(k, spec, key_type, issue_params):
             out.append(warning_cls('algo:rsa:short',
                 'RSA key short (has {} bits, {} bits recommended)'
                 .format(k.key_length, spec['algo:rsa:recommended'])))
+    elif k.key_algo in (KeyAlgo.ECDH, KeyAlgo.ECDSA, KeyAlgo.EDDSA):
+        ecc_key = spec.get('algo:ec25519')
+        if ecc_key == FAIL:
+            out.append(issue_cls('algo:ec25519',
+                'ECC keys are disallowed (RSA is recommended)'))
+        else:
+            # warnings are not used at the moment
+            assert ecc_key is None
+
+            if k.curve not in ('ec25519', 'ed25519'):
+                out.append(issue_cls('algo:ecc:invalid',
+                    'ECC curve {} disallowed (only Curve 25519 supported)'
+                    .format(k.curve)))
+
     elif spec.get('algo:invalid'):
         cls = issue_cls if spec['algo:invalid'] == FAIL else warning_cls
         out.append(issue_cls('algo:invalid',
