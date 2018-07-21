@@ -241,6 +241,8 @@ def main():
             help='Process "gpg --with-colons" output from FILE(s) ("-" for stdin)')
     act.add_argument('-k', '--key-id', nargs='+',
             help='Check local GnuPG keys matching specified query (IDs, names)')
+    act.add_argument('-K', '--keyring', nargs='+',
+            help='Check all keys in specified keyrings (gpg --keyring syntax)')
 
     argp.add_argument('-e', '--errors-only', action='store_true',
             help='Print only errors (skip warnings)')
@@ -253,8 +255,12 @@ def main():
 
     keys = []
 
-    if opts.key_id is not None or opts.all:
+    if opts.key_id is not None or opts.all or opts.keyring is not None:
         cmd = ['gpg', '--with-colons', '--list-keys']
+        if opts.keyring is not None:
+            cmd += ['--no-default-keyring']
+            for k in opts.keyring:
+                cmd += ['--keyring', k]
         if opts.key_id is not None:
             cmd += opts.key_id
         s = subprocess.Popen(cmd,
