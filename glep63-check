@@ -84,10 +84,14 @@ UIDIssue = collections.namedtuple('UIDIssue',
 IssueClasses = collections.namedtuple('IssueClasses',
     ('key', 'subkey', 'uid'))
 
+KeyGood = collections.namedtuple('KeyGood',
+    ('key', 'machine_desc', 'long_desc'))
+SubKeyGood = collections.namedtuple('KeyGood',
+    ('key', 'subkey', 'machine_desc', 'long_desc'))
 
 FAIL = IssueClasses(KeyIssue, SubKeyIssue, UIDIssue)
 WARN = IssueClasses(KeyWarning, SubKeyWarning, None)
-
+INFO = IssueClasses(KeyGood, SubKeyGood, None)
 
 class Years(object):
     def __init__(self, val):
@@ -305,7 +309,7 @@ def check_subkey(k, spec, key_type, issue_params):
     return out
 
 
-def check_key(k, spec):
+def check_key(k, spec, verbose=False):
     out = []
 
     # 0. check key validity (only for whole key)
@@ -330,25 +334,27 @@ def check_key(k, spec):
     #  so we complain about all of them)
     has_signing_subkey = False
     for sk in k.subkeys:
-        # check only signing subkeys
-        if 's' not in sk.key_caps:
-            continue
+        out_subkey = []
         # complain about invalid subkeys
         if sk.validity == Validity.INVALID:
-            out.append(SubKeyIssue(k, sk, 'validity:invalid',
+            out_subkey.append(SubKeyIssue(k, sk, 'validity:invalid',
                 'Subkey is invalid'))
         # skip expired and revoked subkeys
         if sk.validity in (Validity.REVOKED, Validity.EXPIRED):
             continue
 
         if len(sk.key_caps) > 1 and spec.get('subkey:multipurpose'):
-            out.append(spec['subkey:multipurpose'].subkey(k, sk, 'subkey:multipurpose',
+            out_subkey.append(spec['subkey:multipurpose'].subkey(k, sk, 'subkey:multipurpose',
                 'Subkey has multiple capabilities enabled (has: [{}]; use dedicated subkeys!)'
                 .format(sk.key_caps)))
         else:
-            has_signing_subkey = True
+            if 's' in sk.key_caps:
+                has_signing_subkey = True
 
-        out.extend(check_subkey(sk, spec, 'subkey', (k, sk)))
+        out_subkey.extend(check_subkey(sk, spec, 'subkey', (k, sk)))
+        if verbose and all(map(lambda x: x.__class__ in INFO, out_subkey)):
+            out_subkey.append(SubKeyGood(k, sk, 'subkey:good', 'subkey {} is good'.format(sk)))
+        out.extend(out_subkey)
 
     if not has_signing_subkey and spec.get('subkey:none'):
         out.append(spec['subkey:none'].key(k, 'subkey:none',
@@ -374,6 +380,9 @@ def check_key(k, spec):
         out.append(spec['uid:nogentoo'].key(k, 'uid:nogentoo',
             '@gentoo.org e-mail not in key UIDs'))
 
+    if verbose and all(map(lambda x: x.__class__ in INFO, out)):
+        out.append(KeyGood(k, 'key:good', 'key {} is good'.format(k)))
+
     return out
 
 
@@ -390,6 +399,8 @@ def main():
     act.add_argument('-K', '--keyring', nargs='+',
             help='Check all keys in specified keyrings (gpg --keyring syntax)')
 
+    argp.add_argument('-v', '--verbose', action='store_true',
+            help='Verbose output')
     argp.add_argument('-S', '--spec', choices=SPECS, default=DEFAULT_SPEC,
             help='Spec to verify against')
     argp.add_argument('-e', '--errors-only', action='store_true',
@@ -424,7 +435,8 @@ def main():
 
     out = []
     for k in keys:
-        out.extend(check_key(k, SPECS[opts.spec]))
+        check_result = check_key(k, SPECS[opts.spec])
+        out.extend(check_key(k, SPECS[opts.spec], opts.verbose))
 
     ret = 0
     for i in out:
@@ -437,13 +449,15 @@ def main():
         if type(i) in FAIL:
             ret |= 1
             cls = '[E]'
-        else:
-            assert type(i) in WARN
+        elif type(i) in WARN:
             cls = '[W]'
             if opts.errors_only:
                 continue
             if opts.warnings_as_errors:
                 ret |= 2
+        else:
+            assert type(i) in INFO
+            cls = '[I]'
 
         if opts.machine_readable:
             msg = [keyid, i.machine_desc]
