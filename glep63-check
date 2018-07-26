@@ -200,12 +200,12 @@ def process_gnupg_colons(f):
         if vals[0] == 'pub':
             keys.append(PublicKey(
                 *process_initial_key_fields(*vals[1:7]) +
-                (vals[11], vals[16], [], [])))
+                (vals[11], vals[16] if vals[16:1] else '', [], [])))
         elif vals[0] == 'sub':
             assert keys
             keys[-1].subkeys.append(Key(
                 *(process_initial_key_fields(*vals[1:7]) +
-                (vals[11], vals[16]))))
+                (vals[11], vals[16] if vals[16:1] else ''))))
         elif vals[0] == 'uid':
             assert keys
             keys[-1].uids.append(UID(vals[1], process_date(vals[5]),
@@ -404,7 +404,7 @@ def main():
     keys = []
 
     if opts.key_id is not None or opts.all or opts.keyring is not None:
-        cmd = ['gpg', '--with-colons', '--list-keys']
+        cmd = ['gpg', '--with-colons', '--list-keys', '--fixed-list-mode']
         if opts.keyring is not None:
             cmd += ['--no-default-keyring']
             for k in opts.keyring:
