@@ -175,14 +175,22 @@ GLEP63_2_DRAFT_20180707 = {
     'uid:nogentoo': WARN,
 }
 
+GLEP63_2 = GLEP63_2_DRAFT_20180707.copy()
+GLEP63_2.update({
+    '__doc__': 'GLEP 63 v2 as approved by the Council on 2018-07-29',
+    'uid:nogentoo': FAIL,
+})
+
+
 SPECS = {
     'glep63-1-rsa2048': GLEP63_1_RSA2048,
     'glep63-1-strict': GLEP63_1_STRICT,
     'glep63-1-rsa2048-ec25519': GLEP63_1_RSA2048_EC25519,
     'glep63-2-draft-20180707': GLEP63_2_DRAFT_20180707,
+    'glep63-2': GLEP63_2,
 }
 
-DEFAULT_SPEC = 'glep63-1-rsa2048'
+DEFAULT_SPEC = 'glep63-2'
 
 
 def process_gnupg_colons(f):
