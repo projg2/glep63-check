@@ -480,13 +480,13 @@ fpr:::::::::4E0F2E5F105580797681E1A109BE3D8938DA35DF:
     V1_ISSUES = [
         KeyIssue(
             key=KEY,
-            machine_desc='algo:ec25519',
+            machine_desc='algo:ecc',
             long_desc='',
         ),
         SubKeyIssue(
             key=KEY,
             subkey=KEY.subkeys[0],
-            machine_desc='algo:ec25519',
+            machine_desc='algo:ecc',
             long_desc='',
         ),
     ]
@@ -547,13 +547,13 @@ fpr:::::::::AE5287337CFB57FB09E10BE412ACFB3AB4BD7F21:
     V1_ISSUES = [
         KeyIssue(
             key=KEY,
-            machine_desc='algo:ec25519',
+            machine_desc='algo:ecc',
             long_desc='',
         ),
         SubKeyIssue(
             key=KEY,
             subkey=KEY.subkeys[0],
-            machine_desc='algo:ec25519',
+            machine_desc='algo:ecc',
             long_desc='',
         ),
     ]

@@ -50,7 +50,7 @@ def check_subkey(k, spec, key_type, issue_params):
     elif k.key_algo in (KeyAlgo.ECDH, KeyAlgo.ECDSA, KeyAlgo.EDDSA):
         ecc_key = spec.get('algo:ec25519')
         if ecc_key == FAIL:
-            out.append(issue_cls('algo:ec25519',
+            out.append(issue_cls('algo:ecc',
                 'ECC keys are disallowed (RSA is recommended)'))
         else:
             # warnings are not used at the moment
