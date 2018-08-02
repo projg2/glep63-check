@@ -1247,3 +1247,180 @@ fpr:::::::::F216FC6F6C4EC3AD4DE4A4AF2D927DAC6A85C6BD:
             ),
         ],
     }
+
+
+class PrimaryKeyThreeWeekExpirationTest(tests.key_base.BaseKeyTest):
+    KEY_FILE = 'expiration/primary-3w.gpg'
+
+    GPG_COLONS = '''
+tru::1:1533247200:1564783200:3:1:5
+pub:-:4096:1:0C03DAC68D7CAAA4:1533247200:1535061601::u:::cESC::::::23::0:
+fpr:::::::::2CBB31F7106077B10497E2180C03DAC68D7CAAA4:
+uid:-::::1533247201::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <nobody@gentoo.org>::::::::::0:
+sub:-:4096:1:B600D9C92333A0BD:1533247200:1564783200:::::s::::::23:
+fpr:::::::::80DE955635C6D9BF397182E0B600D9C92333A0BD:
+sub:-:4096:1:5C86C94E1054CF0D:1533247200:1564783200:::::e::::::23:
+fpr:::::::::5CB0AB96CC27B81BC863A49A5C86C94E1054CF0D:
+'''
+
+    KEY = PublicKey(
+        validity=Validity.NO_VALUE,
+        key_length=4096,
+        key_algo=KeyAlgo.RSA,
+        keyid='0C03DAC68D7CAAA4',
+        creation_date=datetime.datetime(2018, 8, 2, 22, 0),
+        expiration_date=datetime.datetime(2018, 8, 23, 22, 0, 1),
+        key_caps='cESC',
+        curve='',
+        subkeys=[
+            Key(
+                validity=Validity.NO_VALUE,
+                key_length=4096,
+                key_algo=KeyAlgo.RSA,
+                keyid='B600D9C92333A0BD',
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0),
+                expiration_date=datetime.datetime(2019, 8, 2, 22, 0),
+                key_caps='s',
+                curve='',
+            ),
+            Key(
+                validity=Validity.NO_VALUE,
+                key_length=4096,
+                key_algo=KeyAlgo.RSA,
+                keyid='5C86C94E1054CF0D',
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0),
+                expiration_date=datetime.datetime(2019, 8, 2, 22, 0),
+                key_caps='e',
+                curve='',
+            ),
+        ],
+        uids=[
+            UID(
+                validity=Validity.NO_VALUE,
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 1),
+                expiration_date=None,
+                uid_hash='0DAFDC73F43FC173C2216BA2BB4928391676BF2F',
+                user_id='GLEP63 test key <nobody@gentoo.org>',
+            ),
+        ],
+    )
+
+    EXPECTED_RESULTS = {
+        'glep63-1-rsa2048': [],
+        'glep63-1-rsa2048-ec25519': [],
+        'glep63-1-strict': [],
+        'glep63-2': [
+            KeyWarning(
+                key=KEY,
+                machine_desc='expire:short',
+                long_desc='',
+            ),
+        ],
+        'glep63-2-draft-20180707': [
+            KeyWarning(
+                key=KEY,
+                machine_desc='expire:short',
+                long_desc='',
+            ),
+        ],
+        'glep63-2.1': [
+            KeyWarning(
+                key=KEY,
+                machine_desc='expire:short',
+                long_desc='',
+            ),
+        ],
+    }
+
+
+class SubKeyThreeWeekExpirationTest(tests.key_base.BaseKeyTest):
+    KEY_FILE = 'expiration/subkey-3w.gpg'
+
+    GPG_COLONS = '''
+tru::1:1533247200:1564783200:3:1:5
+pub:-:4096:1:0C03DAC68D7CAAA4:1533247200:1564783200::u:::cESC::::::23::0:
+fpr:::::::::2CBB31F7106077B10497E2180C03DAC68D7CAAA4:
+uid:-::::1533247200::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <nobody@gentoo.org>::::::::::0:
+sub:-:4096:1:B600D9C92333A0BD:1533247200:1535061601:::::s::::::23:
+fpr:::::::::80DE955635C6D9BF397182E0B600D9C92333A0BD:
+sub:-:4096:1:5C86C94E1054CF0D:1533247200:1535061601:::::e::::::23:
+fpr:::::::::5CB0AB96CC27B81BC863A49A5C86C94E1054CF0D:
+'''
+
+    KEY = PublicKey(
+        validity=Validity.NO_VALUE,
+        key_length=4096,
+        key_algo=KeyAlgo.RSA,
+        keyid='0C03DAC68D7CAAA4',
+        creation_date=datetime.datetime(2018, 8, 2, 22, 0),
+        expiration_date=datetime.datetime(2019, 8, 2, 22, 0),
+        key_caps='cESC',
+        curve='',
+        subkeys=[
+            Key(
+                validity=Validity.NO_VALUE,
+                key_length=4096,
+                key_algo=KeyAlgo.RSA,
+                keyid='B600D9C92333A0BD',
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0),
+                expiration_date=datetime.datetime(2018, 8, 23, 22, 0, 1),
+                key_caps='s',
+                curve='',
+            ),
+            Key(
+                validity=Validity.NO_VALUE,
+                key_length=4096,
+                key_algo=KeyAlgo.RSA,
+                keyid='5C86C94E1054CF0D',
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0),
+                expiration_date=datetime.datetime(2018, 8, 23, 22, 0, 1),
+                key_caps='e',
+                curve='',
+            ),
+        ],
+        uids=[
+            UID(
+                validity=Validity.NO_VALUE,
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0),
+                expiration_date=None,
+                uid_hash='0DAFDC73F43FC173C2216BA2BB4928391676BF2F',
+                user_id='GLEP63 test key <nobody@gentoo.org>',
+            ),
+        ],
+    )
+
+    EXPECTED_RESULTS = {
+        'glep63-1-rsa2048': [],
+        'glep63-1-rsa2048-ec25519': [],
+        'glep63-1-strict': [],
+        'glep63-2': [
+            SubKeyWarning(
+                key=KEY,
+                subkey=KEY.subkeys[0],
+                machine_desc='expire:short',
+                long_desc='',
+            ),
+        ],
+        'glep63-2-draft-20180707': [
+            SubKeyWarning(
+                key=KEY,
+                subkey=KEY.subkeys[0],
+                machine_desc='expire:short',
+                long_desc='',
+            ),
+        ],
+        'glep63-2.1': [
+            SubKeyWarning(
+                key=KEY,
+                subkey=KEY.subkeys[0],
+                machine_desc='expire:short',
+                long_desc='',
+            ),
+            SubKeyWarning(
+                key=KEY,
+                subkey=KEY.subkeys[1],
+                machine_desc='expire:short',
+                long_desc='',
+            ),
+        ],
+    }

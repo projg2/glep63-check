@@ -25,8 +25,7 @@ GLEP63_1_RSA2048 = {
     'expire:recommended:key': Years(3),
     'expire:recommended:subkey': Years(1),
     # renewal
-    'expire:short': WARN,
-    'expire:short:length': Days(14),
+    'expire:short:warn': Days(14),
     # multipurpose subkeys
     'subkey:multipurpose': WARN,
     # lack of signing subkey
@@ -65,8 +64,8 @@ GLEP63_2_DRAFT_20180707 = {
     'expire:max:key': Days(900),
     'expire:max:subkey': Days(900),
     # renewal
-    'expire:short': FAIL,
-    'expire:short:length': Days(14),
+    'expire:short:fail': Days(14),
+    'expire:short:warn': Days(28),
     # multipurpose subkeys
     'subkey:multipurpose': WARN,
     # lack of signing subkey

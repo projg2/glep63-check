@@ -91,12 +91,16 @@ def check_subkey(k, spec, key_type, issue_params):
                 out.append(warning_cls('expire:long',
                     'Expiration date is long (is {}, {})'
                     .format(k.expiration_date, expire_str)))
-            elif (spec.get('expire:short') is not None
-                    and expire_left.days < spec['expire:short:length'].days):
-                cls = issue_cls if spec['expire:short'] == FAIL else warning_cls
-                out.append(cls('expire:short',
-                    'Expiration date is short (is {}, less than {})'
-                    .format(k.expiration_date, spec['expire:short:length'])))
+            elif (spec.get('expire:short:fail') is not None
+                    and expire_left.days < spec['expire:short:fail'].days):
+                out.append(issue_cls('expire:short',
+                    'Expiration date is too close, please renew (is {}, less than {})'
+                    .format(k.expiration_date, spec['expire:short:fail'])))
+            elif (spec.get('expire:short:warn') is not None
+                    and expire_left.days < spec['expire:short:warn'].days):
+                out.append(warning_cls('expire:short',
+                    'Expiration date is close, please renew (is {}, less than {})'
+                    .format(k.expiration_date, spec['expire:short:warn'])))
 
     return out
 
