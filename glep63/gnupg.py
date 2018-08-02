@@ -3,6 +3,7 @@
 # Released under the terms of 2-clause BSD license.
 
 import datetime
+import errno
 import io
 import subprocess
 
@@ -71,20 +72,32 @@ def process_gnupg_key(keyrings=None, keyids=None):
     in the keyring(s) are processed.
     """
 
-    cmd = ['gpg', '--with-colons', '--list-keys', '--fixed-list-mode']
-    if keyrings is not None:
-        cmd += ['--no-default-keyring']
-        for k in keyrings:
-            cmd += ['--keyring', k]
-    if keyids is not None:
-        cmd += keyids
+    # prefer gpg2 on systems using split executables
+    for gpg_tool in ('gpg2', 'gpg'):
+        cmd = [gpg_tool, '--with-colons', '--list-keys', '--fixed-list-mode']
+        if keyrings is not None:
+            cmd += ['--no-default-keyring']
+            for k in keyrings:
+                cmd += ['--keyring', k]
+        if keyids is not None:
+            cmd += keyids
 
-    with subprocess.Popen(cmd,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE) as s:
-        with io.TextIOWrapper(s.stdout, encoding='UTF-8') as sout:
-            keys = process_gnupg_colons(sout)
-            if s.wait() != 0:
-                raise subprocess.CalledProcessError(s.returncode, cmd)
+        try:
+            with subprocess.Popen(cmd,
+                    stdin=subprocess.PIPE,
+                    stdout=subprocess.PIPE) as s:
+                with io.TextIOWrapper(s.stdout, encoding='UTF-8') as sout:
+                    keys = process_gnupg_colons(sout)
+                    if s.wait() != 0:
+                        raise subprocess.CalledProcessError(s.returncode, cmd)
+        except OSError as e:
+            if e.errno != errno.ENOENT:
+                raise
+            last_except = e
+            continue
+        else:
+            break
+    else:
+        raise last_except
 
     return keys
