@@ -100,7 +100,7 @@ class {test_name}(tests.key_base.BaseKeyTest):
 
     EXPECTED_RESULTS = {expected}'''.format(
         test_name=test_name,
-        key_file=os.path.basename(key_path),
+        key_file=os.path.relpath(key_path, 'tests'),
         gpg_colons=key_colons,
         key_cls=pretty_key(key_cls),
         expected=pretty_results(results)))
