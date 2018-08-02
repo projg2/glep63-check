@@ -124,6 +124,7 @@ def process_gnupg_key(keyrings=None, keyids=None):
         with io.TextIOWrapper(s.stdout, encoding='UTF-8') as sout:
             keys = process_gnupg_colons(sout)
             if s.wait() != 0:
-                raise subprocess.CalledProcessError(s.returncode, cmd)
+                raise subprocess.CalledProcessError(s.returncode,
+                        [GNUPG_EXECUTABLE] + args)
 
     return keys
