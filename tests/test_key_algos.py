@@ -3,6 +3,7 @@
 # Released under the terms of 2-clause BSD license.
 
 import datetime
+import unittest
 
 from glep63.base import (PublicKey, Key, UID, KeyAlgo, Validity,
         KeyWarning, KeyIssue, SubKeyWarning, SubKeyIssue, UIDIssue)
