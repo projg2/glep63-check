@@ -53,8 +53,9 @@ def process_gnupg_colons(f):
                 (vals[11], vals[16] if vals[16:17] else ''))))
         elif vals[0] == 'uid':
             assert keys
-            keys[-1].uids.append(UID(vals[1], process_date(vals[5]),
-                process_date(vals[6]), vals[7], vals[9]))
+            keys[-1].uids.append(UID(Validity(vals[1]),
+                process_date(vals[5]), process_date(vals[6]),
+                vals[7], vals[9]))
 
     return keys
 

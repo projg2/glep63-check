@@ -44,7 +44,7 @@ fpr:::::::::62D59FE2046463CD65D44A247D36F079CF0CA133:
         ],
         uids=[
             UID(
-                validity='-',
+                validity=Validity.NO_VALUE,
                 creation_date=datetime.datetime(2018, 8, 2, 8, 13, 10),
                 expiration_date=None,
                 uid_hash='0DAFDC73F43FC173C2216BA2BB4928391676BF2F',
@@ -96,7 +96,7 @@ fpr:::::::::56C11AFCB2ABF83B107E928AD8A0594E89EBEDD6:
         ],
         uids=[
             UID(
-                validity='-',
+                validity=Validity.NO_VALUE,
                 creation_date=datetime.datetime(2018, 8, 2, 9, 38, 53),
                 expiration_date=None,
                 uid_hash='0DAFDC73F43FC173C2216BA2BB4928391676BF2F',
@@ -160,7 +160,7 @@ fpr:::::::::C5FA2770E5F8DDF7F9B96F1B55F6865D44767A2E:
         ],
         uids=[
             UID(
-                validity='-',
+                validity=Validity.NO_VALUE,
                 creation_date=datetime.datetime(2018, 8, 2, 11, 8, 59),
                 expiration_date=None,
                 uid_hash='0DAFDC73F43FC173C2216BA2BB4928391676BF2F',
@@ -219,7 +219,7 @@ fpr:::::::::DF1B379EC6E3CDF79F2D030BC25D452B1ED889DD:
         ],
         uids=[
             UID(
-                validity='-',
+                validity=Validity.NO_VALUE,
                 creation_date=datetime.datetime(2018, 8, 2, 11, 11, 42),
                 expiration_date=None,
                 uid_hash='0DAFDC73F43FC173C2216BA2BB4928391676BF2F',
@@ -277,7 +277,7 @@ fpr:::::::::9954BCDA16332A3C380DAE3C55FD297325EAA2B5:
         ],
         uids=[
             UID(
-                validity='-',
+                validity=Validity.NO_VALUE,
                 creation_date=datetime.datetime(2018, 8, 2, 11, 17, 24),
                 expiration_date=None,
                 uid_hash='0DAFDC73F43FC173C2216BA2BB4928391676BF2F',
@@ -340,7 +340,7 @@ fpr:::::::::0BF23B92F74AB354BE52890EF446AAD172206DB4:
         ],
         uids=[
             UID(
-                validity='-',
+                validity=Validity.NO_VALUE,
                 creation_date=datetime.datetime(2018, 8, 2, 11, 21, 22),
                 expiration_date=None,
                 uid_hash='0DAFDC73F43FC173C2216BA2BB4928391676BF2F',
@@ -405,7 +405,7 @@ fpr:::::::::827312B653BFA33304932F8ED1F001792D7EB70D:
         ],
         uids=[
             UID(
-                validity='-',
+                validity=Validity.NO_VALUE,
                 creation_date=datetime.datetime(2018, 8, 2, 11, 26, 25),
                 expiration_date=None,
                 uid_hash='0DAFDC73F43FC173C2216BA2BB4928391676BF2F',
@@ -468,7 +468,7 @@ fpr:::::::::4E0F2E5F105580797681E1A109BE3D8938DA35DF:
         ],
         uids=[
             UID(
-                validity='-',
+                validity=Validity.NO_VALUE,
                 creation_date=datetime.datetime(2018, 8, 2, 11, 30, 43),
                 expiration_date=None,
                 uid_hash='0DAFDC73F43FC173C2216BA2BB4928391676BF2F',
@@ -535,7 +535,7 @@ fpr:::::::::AE5287337CFB57FB09E10BE412ACFB3AB4BD7F21:
         ],
         uids=[
             UID(
-                validity='-',
+                validity=Validity.NO_VALUE,
                 creation_date=datetime.datetime(2018, 8, 2, 11, 34, 7),
                 expiration_date=None,
                 uid_hash='0DAFDC73F43FC173C2216BA2BB4928391676BF2F',
