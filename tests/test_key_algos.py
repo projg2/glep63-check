@@ -499,6 +499,15 @@ fpr:::::::::4E0F2E5F105580797681E1A109BE3D8938DA35DF:
         'glep63-2-draft-20180707': [],
     }
 
+    def test_integration(self):
+        for vl in tests.key_base.get_gnupg_version().splitlines():
+            if vl.startswith(b'Pubkey:') and b'EDDSA' in vl:
+                break
+        else:
+            raise unittest.SkipTest('GnuPG does not seem to have EDDSA support')
+
+        super(ED25519Test, self).test_integration()
+
 
 class NISTP256Test(tests.key_base.BaseKeyTest):
     KEY_FILE = 'algos/nistp256.gpg'
@@ -578,3 +587,12 @@ fpr:::::::::AE5287337CFB57FB09E10BE412ACFB3AB4BD7F21:
         'glep63-2': V2_ISSUES,
         'glep63-2-draft-20180707': V2_ISSUES,
     }
+
+    def test_integration(self):
+        for vl in tests.key_base.get_gnupg_version().splitlines():
+            if vl.startswith(b'Pubkey:') and b'ECDSA' in vl:
+                break
+        else:
+            raise unittest.SkipTest('GnuPG does not seem to have ECDSA support')
+
+        super(NISTP256Test, self).test_integration()

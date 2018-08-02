@@ -3,13 +3,16 @@
 # Released under the terms of 2-clause BSD license.
 
 import datetime
+import errno
 import io
 import os.path
+import subprocess
 import unittest
 import unittest.mock
 
 from glep63.check import (check_key,)
-from glep63.gnupg import (process_gnupg_key, process_gnupg_colons)
+from glep63.gnupg import (process_gnupg_key, process_gnupg_colons,
+                          spawn_gnupg)
 from glep63.specs import (SPECS,)
 
 
@@ -26,6 +29,29 @@ def clear_long_descs(it):
     """
     for e in it:
         yield e._replace(long_desc='')
+
+
+GNUPG_VERSION = None
+
+
+def get_gnupg_version():
+    global GNUPG_VERSION
+    if GNUPG_VERSION is None:
+        try:
+            with spawn_gnupg(['--version'],
+                             stdout=subprocess.PIPE,
+                             env={'LANG': 'C'}) as s:
+                sout, serr = s.communicate()
+                if s.wait() != 0:
+                    GNUPG_VERSION = ''
+                else:
+                    GNUPG_VERSION = sout
+        except OSError as e:
+            if e.errno != errno.ENOENT:
+                raise
+            GNUPG_VERSION = ''
+
+    return GNUPG_VERSION
 
 
 class BaseKeyTest(unittest.TestCase):
@@ -59,6 +85,9 @@ class BaseKeyTest(unittest.TestCase):
         """
         Test the key using local installed GnuPG.
         """
+        if not get_gnupg_version():
+            raise unittest.SkipTest('GnuPG executable not found')
+
         keypath = os.path.join(os.path.dirname(__file__), self.KEY_FILE)
         keys = process_gnupg_key(keyrings=[keypath])
         assert len(keys) == 1
