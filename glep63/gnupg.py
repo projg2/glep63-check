@@ -3,6 +3,8 @@
 # Released under the terms of 2-clause BSD license.
 
 import datetime
+import io
+import subprocess
 
 from glep63.base import (Key, PublicKey, UID)
 
@@ -53,5 +55,35 @@ def process_gnupg_colons(f):
             assert keys
             keys[-1].uids.append(UID(vals[1], process_date(vals[5]),
                 process_date(vals[6]), vals[7], vals[9]))
+
+    return keys
+
+
+def process_gnupg_key(keyrings=None, keyids=None):
+    """
+    Call gpg to get key information.
+
+    @keyrings specifies a list of alternate keyrings to use.  If None,
+    the default keyring is used.
+
+    @keyids specifies a list of keys to process.  If None, all keys
+    in the keyring(s) are processed.
+    """
+
+    cmd = ['gpg', '--with-colons', '--list-keys', '--fixed-list-mode']
+    if keyrings is not None:
+        cmd += ['--no-default-keyring']
+        for k in keyrings:
+            cmd += ['--keyring', k]
+    if keyids is not None:
+        cmd += keyids
+
+    s = subprocess.Popen(cmd,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE)
+    sout = io.TextIOWrapper(s.stdout, encoding='UTF-8')
+    keys = process_gnupg_colons(sout)
+    if s.wait() != 0:
+        raise subprocess.CalledProcessError(s.returncode, cmd)
 
     return keys

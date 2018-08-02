@@ -3,12 +3,10 @@
 # Released under the terms of 2-clause BSD license.
 
 import argparse
-import io
-import subprocess
 
 from glep63.base import (FAIL, WARN)
 from glep63.check import (check_key,)
-from glep63.gnupg import (process_gnupg_colons,)
+from glep63.gnupg import (process_gnupg_colons, process_gnupg_key)
 from glep63.specs import (SPECS, DEFAULT_SPEC)
 
 
@@ -39,20 +37,7 @@ def main():
     keys = []
 
     if opts.key_id is not None or opts.all or opts.keyring is not None:
-        cmd = ['gpg', '--with-colons', '--list-keys', '--fixed-list-mode']
-        if opts.keyring is not None:
-            cmd += ['--no-default-keyring']
-            for k in opts.keyring:
-                cmd += ['--keyring', k]
-        if opts.key_id is not None:
-            cmd += opts.key_id
-        s = subprocess.Popen(cmd,
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE)
-        sout = io.TextIOWrapper(s.stdout, encoding='UTF-8')
-        keys = process_gnupg_colons(sout)
-        if s.wait() != 0:
-            print('Warning: GnuPG exited unnecessfully!')
+        keys.extend(process_gnupg_key(opts.keyring, opts.key_id))
     elif opts.gnupg is not None:
         for f in opts.gnupg:
             keys.extend(process_gnupg_colons(f))
