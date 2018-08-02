@@ -124,3 +124,115 @@ fpr:::::::::A76730D5141B96EFAA7B3E4AF9FDA2910B574DA4:
         'glep63-2': [COMMON_ISSUE],
         'glep63-2-draft-20180707': [COMMON_ISSUE],
     }
+
+
+class NoSigningSubKeyTest(tests.key_base.BaseKeyTest):
+    KEY_FILE = 'other/no-signing-subkey.gpg'
+
+    GPG_COLONS = '''
+pub:-:4096:1:D2BADCAF3ECE4634:1533216330:1564752330::-:::scSC::::::23::0:
+fpr:::::::::4A1ECCE29043E1723862D7EFD2BADCAF3ECE4634:
+uid:-::::1533216330::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <nobody@gentoo.org>::::::::::0:
+'''
+
+    KEY = PublicKey(
+        validity=Validity.NO_VALUE,
+        key_length=4096,
+        key_algo=KeyAlgo.RSA,
+        keyid='D2BADCAF3ECE4634',
+        creation_date=datetime.datetime(2018, 8, 2, 13, 25, 30),
+        expiration_date=datetime.datetime(2019, 8, 2, 13, 25, 30),
+        key_caps='scSC',
+        curve='',
+        subkeys=[
+        ],
+        uids=[
+            UID(
+                validity='-',
+                creation_date=datetime.datetime(2018, 8, 2, 13, 25, 30),
+                expiration_date=None,
+                uid_hash='0DAFDC73F43FC173C2216BA2BB4928391676BF2F',
+                user_id='GLEP63 test key <nobody@gentoo.org>',
+            ),
+        ],
+    )
+
+    COMMON_ISSUE = KeyIssue(
+        key=KEY,
+        machine_desc='subkey:none',
+        long_desc='',
+    )
+
+    EXPECTED_RESULTS = {
+        'glep63-1-rsa2048': [COMMON_ISSUE],
+        'glep63-1-rsa2048-ec25519': [COMMON_ISSUE],
+        'glep63-1-strict': [COMMON_ISSUE],
+        'glep63-2': [COMMON_ISSUE],
+        'glep63-2-draft-20180707': [COMMON_ISSUE],
+    }
+
+
+class MultipurposeSubKeyTest(tests.key_base.BaseKeyTest):
+    KEY_FILE = 'other/multipurpose-subkey.gpg'
+
+    GPG_COLONS = '''
+pub:-:4096:1:D2BADCAF3ECE4634:1533216330:1564752330::-:::scESC::::::23::0:
+fpr:::::::::4A1ECCE29043E1723862D7EFD2BADCAF3ECE4634:
+uid:-::::1533216330::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <nobody@gentoo.org>::::::::::0:
+sub:-:4096:1:EC398A2746705B74:1533216464:1564752464:::::es::::::23:
+fpr:::::::::2E9DB9ECD909BDD449B0E4D8EC398A2746705B74:
+'''
+
+    KEY = PublicKey(
+        validity=Validity.NO_VALUE,
+        key_length=4096,
+        key_algo=KeyAlgo.RSA,
+        keyid='D2BADCAF3ECE4634',
+        creation_date=datetime.datetime(2018, 8, 2, 13, 25, 30),
+        expiration_date=datetime.datetime(2019, 8, 2, 13, 25, 30),
+        key_caps='scESC',
+        curve='',
+        subkeys=[
+            Key(
+                validity=Validity.NO_VALUE,
+                key_length=4096,
+                key_algo=KeyAlgo.RSA,
+                keyid='EC398A2746705B74',
+                creation_date=datetime.datetime(2018, 8, 2, 13, 27, 44),
+                expiration_date=datetime.datetime(2019, 8, 2, 13, 27, 44),
+                key_caps='es',
+                curve='',
+            ),
+        ],
+        uids=[
+            UID(
+                validity='-',
+                creation_date=datetime.datetime(2018, 8, 2, 13, 25, 30),
+                expiration_date=None,
+                uid_hash='0DAFDC73F43FC173C2216BA2BB4928391676BF2F',
+                user_id='GLEP63 test key <nobody@gentoo.org>',
+            ),
+        ],
+    )
+
+    COMMON_ISSUES = [
+        SubKeyWarning(
+            key=KEY,
+            subkey=KEY.subkeys[0],
+            machine_desc='subkey:multipurpose',
+            long_desc='',
+        ),
+        KeyIssue(
+            key=KEY,
+            machine_desc='subkey:none',
+            long_desc='',
+        ),
+    ]
+
+    EXPECTED_RESULTS = {
+        'glep63-1-rsa2048': COMMON_ISSUES,
+        'glep63-1-rsa2048-ec25519': COMMON_ISSUES,
+        'glep63-1-strict': COMMON_ISSUES,
+        'glep63-2': COMMON_ISSUES,
+        'glep63-2-draft-20180707': COMMON_ISSUES,
+    }
