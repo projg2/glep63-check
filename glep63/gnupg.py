@@ -61,6 +61,44 @@ def process_gnupg_colons(f):
     return keys
 
 
+GNUPG_EXECUTABLE = None
+
+
+def spawn_gnupg(args, **subprocess_kwargs):
+    """
+    Find and spawn gnupg with parameters @args.  Returns
+    subprocess.Popen instance.
+
+    @subprocess_kwargs are passed to subprocess.Popen.
+    """
+
+    ret = None
+
+    global GNUPG_EXECUTABLE
+    if GNUPG_EXECUTABLE is None:
+        # prefer gpg2 on systems using split executables
+        for gpg_tool in ('gpg2', 'gpg'):
+            try:
+                ret = subprocess.Popen([gpg_tool] + args,
+                                       **subprocess_kwargs)
+            except OSError as e:
+                if e.errno != errno.ENOENT:
+                    raise
+                last_except = e
+                continue
+            else:
+                break
+
+        if ret is None:
+            raise last_except
+
+        GNUPG_EXECUTABLE = gpg_tool
+        return ret
+    else:
+        return subprocess.Popen([GNUPG_EXECUTABLE] + args,
+                                **subprocess_kwargs)
+
+
 def process_gnupg_key(keyrings=None, keyids=None):
     """
     Call gpg to get key information.
@@ -72,32 +110,20 @@ def process_gnupg_key(keyrings=None, keyids=None):
     in the keyring(s) are processed.
     """
 
-    # prefer gpg2 on systems using split executables
-    for gpg_tool in ('gpg2', 'gpg'):
-        cmd = [gpg_tool, '--with-colons', '--list-keys', '--fixed-list-mode']
-        if keyrings is not None:
-            cmd += ['--no-default-keyring']
-            for k in keyrings:
-                cmd += ['--keyring', k]
-        if keyids is not None:
-            cmd += keyids
+    args = ['--with-colons', '--list-keys', '--fixed-list-mode']
+    if keyrings is not None:
+        args += ['--no-default-keyring']
+        for k in keyrings:
+            args += ['--keyring', k]
+    if keyids is not None:
+        args += keyids
 
-        try:
-            with subprocess.Popen(cmd,
-                    stdin=subprocess.PIPE,
-                    stdout=subprocess.PIPE) as s:
-                with io.TextIOWrapper(s.stdout, encoding='UTF-8') as sout:
-                    keys = process_gnupg_colons(sout)
-                    if s.wait() != 0:
-                        raise subprocess.CalledProcessError(s.returncode, cmd)
-        except OSError as e:
-            if e.errno != errno.ENOENT:
-                raise
-            last_except = e
-            continue
-        else:
-            break
-    else:
-        raise last_except
+    with spawn_gnupg(args,
+                     stdin=subprocess.PIPE,
+                     stdout=subprocess.PIPE) as s:
+        with io.TextIOWrapper(s.stdout, encoding='UTF-8') as sout:
+            keys = process_gnupg_colons(sout)
+            if s.wait() != 0:
+                raise subprocess.CalledProcessError(s.returncode, cmd)
 
     return keys
