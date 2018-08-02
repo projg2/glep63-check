@@ -12,6 +12,7 @@ setup(
     author_email='mgorny@gentoo.org',
     url='http://github.com/mgorny/glep63-verify',
 
+    packages=['glep63'],
     scripts=['glep63-check'],
 
     classifiers=[
