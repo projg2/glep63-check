@@ -2,13 +2,21 @@
 # (c) 2018 Michał Górny
 # Released under the terms of 2-clause BSD license.
 
+import datetime
 import io
 import os.path
 import unittest
+import unittest.mock
 
 from glep63.check import (check_key,)
 from glep63.gnupg import (process_gnupg_key, process_gnupg_colons)
 from glep63.specs import (SPECS,)
+
+
+class PatchedDateTime(datetime.datetime):
+    @classmethod
+    def utcnow(self):
+        return datetime.datetime(2018, 8, 2)
 
 
 def clear_long_descs(it):
@@ -27,11 +35,12 @@ class BaseKeyTest(unittest.TestCase):
         """
         keys = [self.KEY]
 
-        for spec, expected in self.EXPECTED_RESULTS.items():
-            with self.subTest(spec):
-                self.assertListEqual(expected,
-                        list(clear_long_descs(
-                            check_key(keys[0], SPECS[spec]))))
+        with unittest.mock.patch("datetime.datetime", PatchedDateTime) as m:
+            for spec, expected in self.EXPECTED_RESULTS.items():
+                with self.subTest(spec):
+                    self.assertListEqual(expected,
+                            list(clear_long_descs(
+                                check_key(keys[0], SPECS[spec]))))
 
     def test_colons(self):
         """
