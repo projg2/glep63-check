@@ -78,12 +78,12 @@ def process_gnupg_key(keyrings=None, keyids=None):
     if keyids is not None:
         cmd += keyids
 
-    s = subprocess.Popen(cmd,
+    with subprocess.Popen(cmd,
             stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE)
-    sout = io.TextIOWrapper(s.stdout, encoding='UTF-8')
-    keys = process_gnupg_colons(sout)
-    if s.wait() != 0:
-        raise subprocess.CalledProcessError(s.returncode, cmd)
+            stdout=subprocess.PIPE) as s:
+        with io.TextIOWrapper(s.stdout, encoding='UTF-8') as sout:
+            keys = process_gnupg_colons(sout)
+            if s.wait() != 0:
+                raise subprocess.CalledProcessError(s.returncode, cmd)
 
     return keys
