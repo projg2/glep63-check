@@ -25,6 +25,17 @@ class Validity(str, enum.Enum):
     REVOKED = 'r'
     EXPIRED = 'e'
 
+    NO_VALUE = '-'
+    UNDEFINED = 'q'
+
+    NOT_VALID = 'n'
+    MARGINALLY_VALID = 'm'
+    FULLY_VALID = 'f'
+    ULTIMATELY_VALID = 'u'
+
+    WELL_KNOWN_PRIVATE_PART = 'w'
+    SPECIAL = 's'
+
 
 class KeyAlgo(enum.IntEnum):
     RSA                 = 1
