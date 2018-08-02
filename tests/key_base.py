@@ -61,7 +61,7 @@ class BaseKeyTest(unittest.TestCase):
         """
         keys = [self.KEY]
 
-        with unittest.mock.patch("datetime.datetime", PatchedDateTime) as m:
+        with unittest.mock.patch("datetime.datetime", PatchedDateTime):
             for spec, expected in self.EXPECTED_RESULTS.items():
                 with self.subTest(spec):
                     self.assertListEqual(expected,
