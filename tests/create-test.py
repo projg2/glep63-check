@@ -6,13 +6,11 @@
 import enum
 import io
 import os.path
-import pprint
 import subprocess
 import sys
 
 sys.path.insert(0, '.')
 
-from glep63.base import (KeyAlgo, KeyIssue, SubKeyIssue, UIDIssue)
 from glep63.check import (check_key,)
 from glep63.gnupg import (process_gnupg_colons,)
 from glep63.specs import (SPECS,)

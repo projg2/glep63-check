@@ -5,7 +5,7 @@
 import datetime
 
 from glep63.base import (PublicKey, Key, UID, KeyAlgo, Validity,
-        KeyWarning, KeyIssue, SubKeyWarning, SubKeyIssue, UIDIssue)
+        KeyWarning, KeyIssue, SubKeyWarning)
 
 import tests.key_base
 
