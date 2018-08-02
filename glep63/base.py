@@ -3,6 +3,7 @@
 # Released under the terms of 2-clause BSD license.
 
 import collections
+import enum
 
 
 key_keys = ('validity', 'key_length', 'key_algo', 'keyid',
@@ -19,13 +20,13 @@ UID = collections.namedtuple('UID',
 
 
 # gpg/openpgp consts
-class Validity(object):
+class Validity(str, enum.Enum):
     INVALID = 'i'
     REVOKED = 'r'
     EXPIRED = 'e'
 
 
-class KeyAlgo(object):
+class KeyAlgo(enum.IntEnum):
     RSA                 = 1
     RSA_ENCRYPT_ONLY    = 2
     RSA_SIGN_ONLY       = 3

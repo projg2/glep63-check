@@ -6,7 +6,7 @@ import datetime
 import io
 import subprocess
 
-from glep63.base import (Key, PublicKey, UID)
+from glep63.base import (Key, PublicKey, UID, KeyAlgo, Validity)
 
 
 def process_date(d):
@@ -21,9 +21,9 @@ def process_date(d):
 def process_initial_key_fields(validity, key_length, key_algo, keyid,
         creation_date, expiration_date):
     return (
-        validity,
+        Validity(validity),
         int(key_length),
-        int(key_algo),
+        KeyAlgo(int(key_algo)),
         keyid,
         process_date(creation_date),
         process_date(expiration_date),
