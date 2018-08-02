@@ -11,7 +11,7 @@ import tests.key_base
 
 
 class RSA4096GoodKeyTest(tests.key_base.BaseKeyTest):
-    KEY_FILE = 'rsa4096-good.gpg'
+    KEY_FILE = 'algos/rsa4096-good.gpg'
 
     GPG_COLONS = '''
 pub:-:4096:1:1CA702E06E4BCC77:1533197590:1564733590::-:::scSC::::::23::0:
@@ -63,7 +63,7 @@ fpr:::::::::62D59FE2046463CD65D44A247D36F079CF0CA133:
 
 
 class RSA2048GoodKeyTest(tests.key_base.BaseKeyTest):
-    KEY_FILE = 'rsa2048-good.gpg'
+    KEY_FILE = 'algos/rsa2048-good.gpg'
 
     GPG_COLONS = '''
 pub:-:2048:1:1F6B066F475D64D5:1533202733:1564738733::-:::scSC::::::23::0:
@@ -127,7 +127,7 @@ fpr:::::::::56C11AFCB2ABF83B107E928AD8A0594E89EBEDD6:
 
 
 class RSA4096Sub2048Test(tests.key_base.BaseKeyTest):
-    KEY_FILE = 'rsa4096-2048.gpg'
+    KEY_FILE = 'algos/rsa4096-2048.gpg'
 
     GPG_COLONS = '''
 pub:-:4096:1:CFA2E0E6173BEC9D:1533208139:1564744139::-:::scSC::::::23::0:
@@ -186,7 +186,7 @@ fpr:::::::::C5FA2770E5F8DDF7F9B96F1B55F6865D44767A2E:
 
 
 class RSA1024Sub4096Test(tests.key_base.BaseKeyTest):
-    KEY_FILE = 'rsa1024-4096.gpg'
+    KEY_FILE = 'algos/rsa1024-4096.gpg'
 
     GPG_COLONS = '''
 pub:-:1024:1:9B18476870213E0F:1533208302:1564744302::-:::scSC::::::::0:
@@ -244,7 +244,7 @@ fpr:::::::::DF1B379EC6E3CDF79F2D030BC25D452B1ED889DD:
 
 
 class DSA2048RSA4096Test(tests.key_base.BaseKeyTest):
-    KEY_FILE = 'dsa2048-rsa4096.gpg'
+    KEY_FILE = 'algos/dsa2048-rsa4096.gpg'
 
     GPG_COLONS = '''
 pub:-:2048:17:968768FEBAAD6E49:1533208644:1564744644::-:::scSC::::::23::0:
@@ -307,7 +307,7 @@ fpr:::::::::9954BCDA16332A3C380DAE3C55FD297325EAA2B5:
 
 
 class RSA4096DSA2048Test(tests.key_base.BaseKeyTest):
-    KEY_FILE = 'rsa4096-dsa2048.gpg'
+    KEY_FILE = 'algos/rsa4096-dsa2048.gpg'
 
     GPG_COLONS = '''
 pub:-:4096:1:08C3F5E44D93E07D:1533208882:1564744882::-:::scSC::::::23::0:
@@ -372,7 +372,7 @@ fpr:::::::::0BF23B92F74AB354BE52890EF446AAD172206DB4:
 
 
 class DSA1024RSA4096Test(tests.key_base.BaseKeyTest):
-    KEY_FILE = 'dsa1024-rsa4096.gpg'
+    KEY_FILE = 'algos/dsa1024-rsa4096.gpg'
 
     GPG_COLONS = '''
 pub:-:1024:17:AAD1EF4334F3B96B:1533209185:1564745185::-:::scSC::::::::0:
@@ -435,7 +435,7 @@ fpr:::::::::827312B653BFA33304932F8ED1F001792D7EB70D:
 
 
 class ED25519Test(tests.key_base.BaseKeyTest):
-    KEY_FILE = 'ed25519.gpg'
+    KEY_FILE = 'algos/ed25519.gpg'
 
     GPG_COLONS = '''
 pub:-:256:22:EBD990BE5ABC63BF:1533209443:1564745443::-:::scSC:::::ed25519:::0:
@@ -501,7 +501,7 @@ fpr:::::::::4E0F2E5F105580797681E1A109BE3D8938DA35DF:
 
 
 class NISTP256Test(tests.key_base.BaseKeyTest):
-    KEY_FILE = 'nistp256.gpg'
+    KEY_FILE = 'algos/nistp256.gpg'
 
     GPG_COLONS = '''
 tru::1:1533016006:1589192747:3:1:5
