@@ -11,6 +11,15 @@ from glep63.gnupg import (process_gnupg_key, process_gnupg_colons)
 from glep63.specs import (SPECS,)
 
 
+def clear_long_descs(it):
+    """
+    Rewrite all issue classes in @it not to contain long_desc
+    (for better comparison).
+    """
+    for e in it:
+        yield e._replace(long_desc='')
+
+
 class BaseKeyTest(unittest.TestCase):
     def test_key_class(self):
         """
@@ -21,7 +30,8 @@ class BaseKeyTest(unittest.TestCase):
         for spec, expected in self.EXPECTED_RESULTS.items():
             with self.subTest(spec):
                 self.assertListEqual(expected,
-                        check_key(keys[0], SPECS[spec]))
+                        list(clear_long_descs(
+                            check_key(keys[0], SPECS[spec]))))
 
     def test_colons(self):
         """
@@ -33,7 +43,8 @@ class BaseKeyTest(unittest.TestCase):
         for spec, expected in self.EXPECTED_RESULTS.items():
             with self.subTest(spec):
                 self.assertListEqual(expected,
-                        check_key(keys[0], SPECS[spec]))
+                        list(clear_long_descs(
+                            check_key(keys[0], SPECS[spec]))))
 
     def test_integration(self):
         """
@@ -46,4 +57,5 @@ class BaseKeyTest(unittest.TestCase):
         for spec, expected in self.EXPECTED_RESULTS.items():
             with self.subTest(spec):
                 self.assertListEqual(expected,
-                        check_key(keys[0], SPECS[spec]))
+                        list(clear_long_descs(
+                            check_key(keys[0], SPECS[spec]))))

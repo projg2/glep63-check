@@ -29,7 +29,7 @@ def pretty_key(key, indent=4):
         elif k == 'uid':
             v = 'KEY.uids[0]'
         elif k == 'long_desc':
-            v = ''
+            v = repr('')
         elif isinstance(v, enum.Enum):
             v = '{}.{}'.format(v.__class__.__name__, v.name)
         elif isinstance(v, list):
@@ -98,12 +98,12 @@ class {test_name}(tests.key_base.BaseKeyTest):
 
     KEY = {key_cls}
 
-    EXPECTED_RESULTS = {expected}
-'''.format(test_name=test_name,
-           key_file=os.path.basename(key_path),
-           gpg_colons=key_colons,
-           key_cls=pretty_key(key_cls),
-           expected=pretty_results(results)))
+    EXPECTED_RESULTS = {expected}'''.format(
+        test_name=test_name,
+        key_file=os.path.basename(key_path),
+        gpg_colons=key_colons,
+        key_cls=pretty_key(key_cls),
+        expected=pretty_results(results)))
 
 
 if __name__ == '__main__':
