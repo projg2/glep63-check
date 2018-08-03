@@ -75,11 +75,12 @@ class BaseKeyTest(unittest.TestCase):
         keys = process_gnupg_colons(io.StringIO(self.GPG_COLONS))
         assert len(keys) == 1
 
-        for spec, expected in self.EXPECTED_RESULTS.items():
-            with self.subTest(spec):
-                self.assertListEqual(expected,
-                        list(clear_long_descs(
-                            check_key(keys[0], SPECS[spec]))))
+        with unittest.mock.patch("datetime.datetime", PatchedDateTime):
+            for spec, expected in self.EXPECTED_RESULTS.items():
+                with self.subTest(spec):
+                    self.assertListEqual(expected,
+                            list(clear_long_descs(
+                                check_key(keys[0], SPECS[spec]))))
 
     def test_integration(self):
         """
@@ -92,8 +93,9 @@ class BaseKeyTest(unittest.TestCase):
         keys = process_gnupg_key(keyrings=[keypath])
         assert len(keys) == 1
 
-        for spec, expected in self.EXPECTED_RESULTS.items():
-            with self.subTest(spec):
-                self.assertListEqual(expected,
-                        list(clear_long_descs(
-                            check_key(keys[0], SPECS[spec]))))
+        with unittest.mock.patch("datetime.datetime", PatchedDateTime):
+            for spec, expected in self.EXPECTED_RESULTS.items():
+                with self.subTest(spec):
+                    self.assertListEqual(expected,
+                            list(clear_long_descs(
+                                check_key(keys[0], SPECS[spec]))))
