@@ -3,7 +3,6 @@
 # Released under the terms of 2-clause BSD license.
 
 import datetime
-import errno
 import io
 import os.path
 import subprocess
@@ -21,11 +20,9 @@ class FakeTimePopen(subprocess.Popen):
         cmd = ['faketime', '-f', '2018-08-03 00:00:00'] + cmd
         try:
             return super(FakeTimePopen, self).__init__(cmd, *args, **kwargs)
-        except OSError as e:
-            if e.errno == errno.ENOENT:
-                raise unittest.SkipTest(
-                        'faketime is required to run GPG integration tests')
-            raise
+        except FileNotFoundError:
+            raise unittest.SkipTest(
+                    'faketime is required to run GPG integration tests')
 
 
 class PatchedDateTime(datetime.datetime):
@@ -58,9 +55,7 @@ def get_gnupg_version():
                     GNUPG_VERSION = ''
                 else:
                     GNUPG_VERSION = sout
-        except OSError as e:
-            if e.errno != errno.ENOENT:
-                raise
+        except FileNotFoundError:
             GNUPG_VERSION = ''
 
     return GNUPG_VERSION

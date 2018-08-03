@@ -3,7 +3,6 @@
 # Released under the terms of 2-clause BSD license.
 
 import datetime
-import errno
 import io
 import subprocess
 
@@ -81,9 +80,7 @@ def spawn_gnupg(args, **subprocess_kwargs):
             try:
                 ret = subprocess.Popen([gpg_tool] + args,
                                        **subprocess_kwargs)
-            except OSError as e:
-                if e.errno != errno.ENOENT:
-                    raise
+            except FileNotFoundError as e:
                 last_except = e
                 continue
             else:
