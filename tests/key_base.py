@@ -16,10 +16,22 @@ from glep63.gnupg import (process_gnupg_key, process_gnupg_colons,
 from glep63.specs import (SPECS,)
 
 
+class FakeTimePopen(subprocess.Popen):
+    def __init__(self, cmd, *args, **kwargs):
+        cmd = ['faketime', '-f', '2018-08-03 00:00:00'] + cmd
+        try:
+            return super(FakeTimePopen, self).__init__(cmd, *args, **kwargs)
+        except OSError as e:
+            if e.errno == errno.ENOENT:
+                raise unittest.SkipTest(
+                        'faketime is required to run GPG integration tests')
+            raise
+
+
 class PatchedDateTime(datetime.datetime):
     @classmethod
     def utcnow(self):
-        return datetime.datetime(2018, 8, 2)
+        return datetime.datetime(2018, 8, 3)
 
 
 def clear_long_descs(it):
@@ -90,7 +102,8 @@ class BaseKeyTest(unittest.TestCase):
             raise unittest.SkipTest('GnuPG executable not found')
 
         keypath = os.path.join(os.path.dirname(__file__), self.KEY_FILE)
-        keys = process_gnupg_key(keyrings=[keypath])
+        with unittest.mock.patch("glep63.gnupg.subprocess.Popen", FakeTimePopen):
+            keys = process_gnupg_key(keyrings=[keypath])
         assert len(keys) == 1
 
         with unittest.mock.patch("datetime.datetime", PatchedDateTime):
