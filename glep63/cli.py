@@ -3,6 +3,7 @@
 # Released under the terms of 2-clause BSD license.
 
 import argparse
+import email.utils
 import shutil
 import tempfile
 import urllib.request
@@ -36,6 +37,8 @@ def main():
             help='Print only errors (skip warnings)')
     argp.add_argument('-m', '--machine-readable', action='store_true',
             help='Print only machine-readable data (skip human-readable desc)')
+    argp.add_argument('-N', '--no-name', action='store_true',
+            help='Print only e-mail addresses as UIDs')
     argp.add_argument('-w', '--warnings-as-errors', action='store_true',
             help='Treat warnings as errors (return unsucessfully if any)')
 
@@ -70,12 +73,17 @@ def main():
             if '@gentoo.org' in x.user_id:
                 primary_uid = x.user_id
                 break
+        _, uid_addr = email.utils.parseaddr(primary_uid)
 
         keyid = i.key.keyid
         if hasattr(i, 'subkey'):
             keyid += ':' + i.subkey.keyid
         elif hasattr(i, 'uid'):
-            keyid += ':[{}]'.format(i.uid.user_id)
+            if opts.no_name:
+                _, uid_fmt = email.utils.parseaddr(i.uid_user_id)
+            else:
+                uid_fmt = i.uid.user_id
+            keyid += ':[{}]'.format(uid_fmt)
 
         if type(i) in FAIL:
             ret |= 1
@@ -91,8 +99,9 @@ def main():
         if opts.machine_readable:
             msg = [keyid, i.machine_desc]
         else:
-            msg = [keyid, '[{}]'.format(primary_uid), cls,
-                   i.machine_desc, i.long_desc]
+            msg = [keyid, '[{}]'.format(
+                uid_addr if opts.no_name else primary_uid),
+                cls, i.machine_desc, i.long_desc]
 
         print(' '.join(msg))
 
