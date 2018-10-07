@@ -66,6 +66,7 @@ def main():
         out.extend(check_key(k, SPECS[opts.spec]))
 
     ret = 0
+    msgs = []
     for i in out:
         # figure out a primary UID, preferring @gentoo.org
         primary_uid = i.key.uids[0].user_id
@@ -103,6 +104,9 @@ def main():
                 uid_addr if opts.no_name else primary_uid),
                 cls, i.machine_desc, i.long_desc]
 
+        msgs.append((uid_addr, msg))
+
+    for addr, msg in msgs:
         print(' '.join(msg))
 
     return ret
