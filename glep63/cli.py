@@ -3,6 +3,7 @@
 # Released under the terms of 2-clause BSD license.
 
 import argparse
+import collections
 import email.utils
 import shutil
 import tempfile
@@ -12,6 +13,9 @@ from glep63.base import (FAIL, WARN)
 from glep63.check import (check_key,)
 from glep63.gnupg import (process_gnupg_colons, process_gnupg_key)
 from glep63.specs import (SPECS, DEFAULT_SPEC)
+
+
+GoodKey = collections.namedtuple('GoodKey', ['key'])
 
 
 def main():
@@ -35,6 +39,8 @@ def main():
             help='Spec to verify against')
     argp.add_argument('-e', '--errors-only', action='store_true',
             help='Print only errors (skip warnings)')
+    argp.add_argument('-i', '--ignore-extraneous-keys', action='store_true',
+            help='Skip developers who have at least one good key (by UID)')
     argp.add_argument('-m', '--machine-readable', action='store_true',
             help='Print only machine-readable data (skip human-readable desc)')
     argp.add_argument('-N', '--no-name', action='store_true',
@@ -63,9 +69,13 @@ def main():
 
     out = []
     for k in keys:
-        out.extend(check_key(k, SPECS[opts.spec]))
+        keyret = check_key(k, SPECS[opts.spec])
+        if not keyret and opts.ignore_extraneous_keys:
+            keyret = [GoodKey(k)]
+        out.extend(keyret)
 
     ret = 0
+    good_devs = set()
     msgs = []
     for i in out:
         # figure out a primary UID, preferring @gentoo.org
@@ -75,6 +85,10 @@ def main():
                 primary_uid = x.user_id
                 break
         _, uid_addr = email.utils.parseaddr(primary_uid)
+
+        if isinstance(i, GoodKey):
+            good_devs.add(uid_addr)
+            continue
 
         keyid = i.key.keyid
         if hasattr(i, 'subkey'):
@@ -107,6 +121,7 @@ def main():
         msgs.append((uid_addr, msg))
 
     for addr, msg in msgs:
-        print(' '.join(msg))
+        if addr not in good_devs:
+            print(' '.join(msg))
 
     return ret
