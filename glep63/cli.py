@@ -64,6 +64,13 @@ def main():
 
     ret = 0
     for i in out:
+        # figure out a primary UID, preferring @gentoo.org
+        primary_uid = i.key.uids[0].user_id
+        for x in i.key.uids:
+            if '@gentoo.org' in x.user_id:
+                primary_uid = x.user_id
+                break
+
         keyid = i.key.keyid
         if hasattr(i, 'subkey'):
             keyid += ':' + i.subkey.keyid
@@ -84,11 +91,8 @@ def main():
         if opts.machine_readable:
             msg = [keyid, i.machine_desc]
         else:
-            # decorate with readable UID
-            sorted_uids = sorted(i.key.uids,
-                    key=lambda x: not '@gentoo.org' in x.user_id)
-            uid = '[{}]'.format(sorted_uids[0].user_id)
-            msg = [keyid, uid, cls, i.machine_desc, i.long_desc]
+            msg = [keyid, '[{}]'.format(primary_uid), cls,
+                   i.machine_desc, i.long_desc]
 
         print(' '.join(msg))
 
