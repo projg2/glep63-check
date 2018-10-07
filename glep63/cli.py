@@ -3,6 +3,9 @@
 # Released under the terms of 2-clause BSD license.
 
 import argparse
+import shutil
+import tempfile
+import urllib.request
 
 from glep63.base import (FAIL, WARN)
 from glep63.check import (check_key,)
@@ -15,6 +18,10 @@ def main():
     act = argp.add_mutually_exclusive_group(required=True)
     act.add_argument('-a', '--all', action='store_true',
             help='Verify all public keys in the local keyring')
+    act.add_argument('-d', '--developers', action='store_true',
+            help='Fetch and verify keys for gentoo.git committers')
+    act.add_argument('-D', '--all-developers', action='store_true',
+            help='Fetch and verify keys for all Gentoo developers')
     act.add_argument('-G', '--gnupg',
             nargs='+', metavar='FILE', type=argparse.FileType('r', encoding='UTF-8'),
             help='Process "gpg --with-colons" output from FILE(s) ("-" for stdin)')
@@ -36,7 +43,16 @@ def main():
 
     keys = []
 
-    if opts.key_id is not None or opts.all or opts.keyring is not None:
+    if opts.developers or opts.all_developers:
+        keyring_url = ('https://qa-reports.gentoo.org/output/{}.gpg'
+                       .format('committing-devs' if opts.developers
+                               else 'active-devs'))
+        with urllib.request.urlopen(keyring_url) as f:
+            with tempfile.NamedTemporaryFile() as tmpf:
+                shutil.copyfileobj(f, tmpf)
+                tmpf.flush()
+                keys.extend(process_gnupg_key([tmpf.name], opts.key_id))
+    elif opts.key_id is not None or opts.all or opts.keyring is not None:
         keys.extend(process_gnupg_key(opts.keyring, opts.key_id))
     elif opts.gnupg is not None:
         for f in opts.gnupg:
