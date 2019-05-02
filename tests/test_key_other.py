@@ -159,7 +159,7 @@ uid:-::::1533216330::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <
 
     COMMON_ISSUE = KeyIssue(
         key=KEY,
-        machine_desc='subkey:none',
+        machine_desc='subkey:none:s',
         long_desc='',
     )
 
@@ -224,7 +224,7 @@ fpr:::::::::2E9DB9ECD909BDD449B0E4D8EC398A2746705B74:
         ),
         KeyIssue(
             key=KEY,
-            machine_desc='subkey:none',
+            machine_desc='subkey:none:s',
             long_desc='',
         ),
     ]
@@ -419,7 +419,7 @@ fpr:::::::::35BE82A378F1AD83B962A4B4708A01D22A110A09:
 
     COMMON_ISSUE = KeyIssue(
         key=KEY,
-        machine_desc='subkey:none',
+        machine_desc='subkey:none:s',
         long_desc='',
     )
 

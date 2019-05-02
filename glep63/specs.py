@@ -7,6 +7,8 @@ from glep63.base import (WARN, FAIL, Years, Days)
 
 GLEP63_1_RSA2048 = {
     '__doc__': 'GLEP 63 v1 without RSA4096 preference',
+    # subkey types to check
+    '__subkey_types__': ['s'],
     # DSA key algorithm
     'algo:dsa': WARN,
     'algo:dsa:minlength': 2048,
@@ -49,6 +51,8 @@ GLEP63_1_RSA2048_EC25519.update({
 
 GLEP63_2_DRAFT_20180707 = {
     '__doc__': 'GLEP 63 v2 draft as of 2018-07-07',
+    # subkey types to check
+    '__subkey_types__': ['s'],
     # DSA key algorithm
     'algo:dsa': FAIL,
     # RSA key algorithm
@@ -77,6 +81,13 @@ GLEP63_2.update({
     'uid:nogentoo': FAIL,
 })
 
+GLEP63_2_1 = GLEP63_2.copy()
+GLEP63_2_1.update({
+    '__doc__': 'GLEP 63 v2.1 as approved by the Council on 2019-04-14',
+    # subkey types to check
+    '__subkey_types__': ['s', 'e'],
+})
+
 
 SPECS = {
     'glep63-1-rsa2048': GLEP63_1_RSA2048,
@@ -84,6 +95,7 @@ SPECS = {
     'glep63-1-rsa2048-ec25519': GLEP63_1_RSA2048_EC25519,
     'glep63-2-draft-20180707': GLEP63_2_DRAFT_20180707,
     'glep63-2': GLEP63_2,
+    'glep63-2.1': GLEP63_2_1,
 }
 
-DEFAULT_SPEC = 'glep63-2'
+DEFAULT_SPEC = 'glep63-2.1'

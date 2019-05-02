@@ -124,14 +124,19 @@ def check_key(k, spec):
     # 2. check subkeys
     # (sadly, we can't be sure *which* subkey is used for Gentoo,
     #  so we complain about all of them)
-    has_signing_subkey = False
+    has_subkey_of_type = {'a': False, 'e': False, 's': False}
     good_keys_by_type = {'a': [], 'e': [], 's': []}
     for sk in k.subkeys:
         result = []
 
-        # check only signing subkeys
-        if 's' not in sk.key_caps:
+        # check only specified subkey types
+        for t in spec['__subkey_types__']:
+            assert t in ('s', 'e')
+            if t in sk.key_caps:
+                break
+        else:
             continue
+
         # complain about invalid subkeys
         if sk.validity == Validity.INVALID:
             result.append(SubKeyIssue(k, sk, 'validity:invalid',
@@ -145,7 +150,7 @@ def check_key(k, spec):
                 'Subkey has multiple capabilities enabled (has: [{}]; use dedicated subkeys!)'
                 .format(sk.key_caps)))
         else:
-            has_signing_subkey = True
+            has_subkey_of_type[sk.key_caps] = True
 
         result += check_subkey(sk, spec, 'subkey', (k, sk))
         # check whether the subkey had any issues; if not, add it
@@ -159,14 +164,18 @@ def check_key(k, spec):
         out += result
 
     # make subkey:expire non-fatal if there is at least one good subkey
-    if good_keys_by_type['s']:
-        for i, r in enumerate(out):
-            if isinstance(r, SubKeyIssue) and r.machine_desc == 'expire:short':
-                out[i] = SubKeyWarning(*r)
+    for t in spec['__subkey_types__']:
+        if good_keys_by_type[t]:
+            for i, r in enumerate(out):
+                if (isinstance(r, SubKeyIssue)
+                        and r.machine_desc == 'expire:short'
+                        and r.subkey.key_caps == t):
+                    out[i] = SubKeyWarning(*r)
 
-    if not has_signing_subkey and spec.get('subkey:none'):
-        out.append(spec['subkey:none'].key(k, 'subkey:none',
-            'Having a dedicated signing subkey is required'))
+        if not has_subkey_of_type[t] and spec.get('subkey:none'):
+            out.append(spec['subkey:none'].key(k, 'subkey:none:{}'.format(t),
+                'Having a dedicated {} subkey is required'.format(
+                    'signing' if t == 's' else 'encryption')))
 
     # 3. check UIDs
     # (require the @gentoo.org e-mail)
