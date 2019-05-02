@@ -56,7 +56,7 @@ def check_subkey(k, spec, key_type, issue_params):
             # warnings are not used at the moment
             assert ecc_key is None
 
-            if k.curve not in ('ec25519', 'ed25519'):
+            if k.curve not in ('cv25519', 'ec25519', 'ed25519'):
                 out.append(issue_cls('algo:ecc:invalid',
                     'ECC curve {} disallowed (only Curve 25519 supported)'
                     .format(k.curve)))
