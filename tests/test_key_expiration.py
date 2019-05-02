@@ -1,5 +1,5 @@
 # glep63-check -- tests for issues related to key expiration
-# (c) 2018 Michał Górny
+# (c) 2018-2019 Michał Górny
 # Released under the terms of 2-clause BSD license.
 
 import datetime
@@ -14,38 +14,51 @@ class PrimaryKeyNoExpirationTest(tests.key_base.BaseKeyTest):
     KEY_FILE = 'expiration/primary-noexpire.gpg'
 
     GPG_COLONS = '''
-pub:-:4096:1:CFD4B3EC01FB9A51:1533210309:::-:::scSC::::::23::0:
-fpr:::::::::8386FCEB4CE07C9FA30F9E71CFD4B3EC01FB9A51:
-uid:-::::1533210309::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <nobody@gentoo.org>::::::::::0:
-sub:-:4096:1:14F0813D42225877:1533210363:1564746363:::::s::::::23:
-fpr:::::::::693AE5F2C1CCE7CA30FF07F214F0813D42225877:
+tru::1:1556681170:1560354194:3:1:5
+pub:-:4096:1:0F2446E70C90BD31:1533247200:::-:::cESC::::::23::0:
+fpr:::::::::4D94D1CD1D552073A6579CE70F2446E70C90BD31:
+uid:-::::1533247201::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <nobody@gentoo.org>::::::::::0:
+sub:-:4096:1:3F911DBFC4B51F74:1533247201:1564783201:::::s::::::23:
+fpr:::::::::26BF2B75CB42D5803C615AF43F911DBFC4B51F74:
+sub:-:4096:1:44C9C2CFA6974493:1533247201:1564783201:::::e::::::23:
+fpr:::::::::CF8439AF79B439E0D9D7C99B44C9C2CFA6974493:
 '''
 
     KEY = PublicKey(
         validity=Validity.NO_VALUE,
         key_length=4096,
         key_algo=KeyAlgo.RSA,
-        keyid='CFD4B3EC01FB9A51',
-        creation_date=datetime.datetime(2018, 8, 2, 11, 45, 9),
+        keyid='0F2446E70C90BD31',
+        creation_date=datetime.datetime(2018, 8, 2, 22, 0),
         expiration_date=None,
-        key_caps='scSC',
+        key_caps='cESC',
         curve='',
         subkeys=[
             Key(
                 validity=Validity.NO_VALUE,
                 key_length=4096,
                 key_algo=KeyAlgo.RSA,
-                keyid='14F0813D42225877',
-                creation_date=datetime.datetime(2018, 8, 2, 11, 46, 3),
-                expiration_date=datetime.datetime(2019, 8, 2, 11, 46, 3),
+                keyid='3F911DBFC4B51F74',
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 1),
+                expiration_date=datetime.datetime(2019, 8, 2, 22, 0, 1),
                 key_caps='s',
+                curve='',
+            ),
+            Key(
+                validity=Validity.NO_VALUE,
+                key_length=4096,
+                key_algo=KeyAlgo.RSA,
+                keyid='44C9C2CFA6974493',
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 1),
+                expiration_date=datetime.datetime(2019, 8, 2, 22, 0, 1),
+                key_caps='e',
                 curve='',
             ),
         ],
         uids=[
             UID(
                 validity=Validity.NO_VALUE,
-                creation_date=datetime.datetime(2018, 8, 2, 11, 45, 9),
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 1),
                 expiration_date=None,
                 uid_hash='0DAFDC73F43FC173C2216BA2BB4928391676BF2F',
                 user_id='GLEP63 test key <nobody@gentoo.org>',
@@ -53,18 +66,49 @@ fpr:::::::::693AE5F2C1CCE7CA30FF07F214F0813D42225877:
         ],
     )
 
-    COMMON_ISSUE = KeyIssue(
-        key=KEY,
-        machine_desc='expire:none',
-        long_desc='',
-    )
-
     EXPECTED_RESULTS = {
-        'glep63-1-rsa2048': [COMMON_ISSUE],
-        'glep63-1-rsa2048-ec25519': [COMMON_ISSUE],
-        'glep63-1-strict': [COMMON_ISSUE],
-        'glep63-2': [COMMON_ISSUE],
-        'glep63-2-draft-20180707': [COMMON_ISSUE],
+        'glep63-1-rsa2048': [
+            KeyIssue(
+                key=KEY,
+                machine_desc='expire:none',
+                long_desc='',
+            ),
+        ],
+        'glep63-1-rsa2048-ec25519': [
+            KeyIssue(
+                key=KEY,
+                machine_desc='expire:none',
+                long_desc='',
+            ),
+        ],
+        'glep63-1-strict': [
+            KeyIssue(
+                key=KEY,
+                machine_desc='expire:none',
+                long_desc='',
+            ),
+        ],
+        'glep63-2': [
+            KeyIssue(
+                key=KEY,
+                machine_desc='expire:none',
+                long_desc='',
+            ),
+        ],
+        'glep63-2-draft-20180707': [
+            KeyIssue(
+                key=KEY,
+                machine_desc='expire:none',
+                long_desc='',
+            ),
+        ],
+        'glep63-2.1': [
+            KeyIssue(
+                key=KEY,
+                machine_desc='expire:none',
+                long_desc='',
+            ),
+        ],
     }
 
 
@@ -72,38 +116,51 @@ class PrimaryKeyThreeYearExpirationTest(tests.key_base.BaseKeyTest):
     KEY_FILE = 'expiration/primary-3y.gpg'
 
     GPG_COLONS = '''
-pub:-:4096:1:CFD4B3EC01FB9A51:1533210309:1627818785::-:::scSC::::::23::0:
-fpr:::::::::8386FCEB4CE07C9FA30F9E71CFD4B3EC01FB9A51:
-uid:-::::1533210785::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <nobody@gentoo.org>::::::::::0:
-sub:-:4096:1:14F0813D42225877:1533210363:1564746363:::::s::::::23:
-fpr:::::::::693AE5F2C1CCE7CA30FF07F214F0813D42225877:
+tru::1:1556681170:1560354194:3:1:5
+pub:-:4096:1:0F2446E70C90BD31:1533247200:1627855202::-:::cESC::::::23::0:
+fpr:::::::::4D94D1CD1D552073A6579CE70F2446E70C90BD31:
+uid:-::::1533247202::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <nobody@gentoo.org>::::::::::0:
+sub:-:4096:1:3F911DBFC4B51F74:1533247201:1564783201:::::s::::::23:
+fpr:::::::::26BF2B75CB42D5803C615AF43F911DBFC4B51F74:
+sub:-:4096:1:44C9C2CFA6974493:1533247201:1564783201:::::e::::::23:
+fpr:::::::::CF8439AF79B439E0D9D7C99B44C9C2CFA6974493:
 '''
 
     KEY = PublicKey(
         validity=Validity.NO_VALUE,
         key_length=4096,
         key_algo=KeyAlgo.RSA,
-        keyid='CFD4B3EC01FB9A51',
-        creation_date=datetime.datetime(2018, 8, 2, 11, 45, 9),
-        expiration_date=datetime.datetime(2021, 8, 1, 11, 53, 5),
-        key_caps='scSC',
+        keyid='0F2446E70C90BD31',
+        creation_date=datetime.datetime(2018, 8, 2, 22, 0),
+        expiration_date=datetime.datetime(2021, 8, 1, 22, 0, 2),
+        key_caps='cESC',
         curve='',
         subkeys=[
             Key(
                 validity=Validity.NO_VALUE,
                 key_length=4096,
                 key_algo=KeyAlgo.RSA,
-                keyid='14F0813D42225877',
-                creation_date=datetime.datetime(2018, 8, 2, 11, 46, 3),
-                expiration_date=datetime.datetime(2019, 8, 2, 11, 46, 3),
+                keyid='3F911DBFC4B51F74',
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 1),
+                expiration_date=datetime.datetime(2019, 8, 2, 22, 0, 1),
                 key_caps='s',
+                curve='',
+            ),
+            Key(
+                validity=Validity.NO_VALUE,
+                key_length=4096,
+                key_algo=KeyAlgo.RSA,
+                keyid='44C9C2CFA6974493',
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 1),
+                expiration_date=datetime.datetime(2019, 8, 2, 22, 0, 1),
+                key_caps='e',
                 curve='',
             ),
         ],
         uids=[
             UID(
                 validity=Validity.NO_VALUE,
-                creation_date=datetime.datetime(2018, 8, 2, 11, 53, 5),
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 2),
                 expiration_date=None,
                 uid_hash='0DAFDC73F43FC173C2216BA2BB4928391676BF2F',
                 user_id='GLEP63 test key <nobody@gentoo.org>',
@@ -111,18 +168,31 @@ fpr:::::::::693AE5F2C1CCE7CA30FF07F214F0813D42225877:
         ],
     )
 
-    V2_ISSUE = KeyIssue(
-        key=KEY,
-        machine_desc='expire:long',
-        long_desc='',
-    )
-
     EXPECTED_RESULTS = {
         'glep63-1-rsa2048': [],
         'glep63-1-rsa2048-ec25519': [],
         'glep63-1-strict': [],
-        'glep63-2': [V2_ISSUE],
-        'glep63-2-draft-20180707': [V2_ISSUE],
+        'glep63-2': [
+            KeyIssue(
+                key=KEY,
+                machine_desc='expire:long',
+                long_desc='',
+            ),
+        ],
+        'glep63-2-draft-20180707': [
+            KeyIssue(
+                key=KEY,
+                machine_desc='expire:long',
+                long_desc='',
+            ),
+        ],
+        'glep63-2.1': [
+            KeyIssue(
+                key=KEY,
+                machine_desc='expire:long',
+                long_desc='',
+            ),
+        ],
     }
 
 
@@ -130,38 +200,51 @@ class PrimaryKeyTwoYearExpirationTest(tests.key_base.BaseKeyTest):
     KEY_FILE = 'expiration/primary-2y.gpg'
 
     GPG_COLONS = '''
-pub:-:4096:1:CFD4B3EC01FB9A51:1533210309:1596282803::-:::scSC::::::23::0:
-fpr:::::::::8386FCEB4CE07C9FA30F9E71CFD4B3EC01FB9A51:
-uid:-::::1533210803::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <nobody@gentoo.org>::::::::::0:
-sub:-:4096:1:14F0813D42225877:1533210363:1564746363:::::s::::::23:
-fpr:::::::::693AE5F2C1CCE7CA30FF07F214F0813D42225877:
+tru::1:1556681170:1560354194:3:1:5
+pub:-:4096:1:0F2446E70C90BD31:1533247200:1596319203::-:::cESC::::::23::0:
+fpr:::::::::4D94D1CD1D552073A6579CE70F2446E70C90BD31:
+uid:-::::1533247203::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <nobody@gentoo.org>::::::::::0:
+sub:-:4096:1:3F911DBFC4B51F74:1533247201:1564783201:::::s::::::23:
+fpr:::::::::26BF2B75CB42D5803C615AF43F911DBFC4B51F74:
+sub:-:4096:1:44C9C2CFA6974493:1533247201:1564783201:::::e::::::23:
+fpr:::::::::CF8439AF79B439E0D9D7C99B44C9C2CFA6974493:
 '''
 
     KEY = PublicKey(
         validity=Validity.NO_VALUE,
         key_length=4096,
         key_algo=KeyAlgo.RSA,
-        keyid='CFD4B3EC01FB9A51',
-        creation_date=datetime.datetime(2018, 8, 2, 11, 45, 9),
-        expiration_date=datetime.datetime(2020, 8, 1, 11, 53, 23),
-        key_caps='scSC',
+        keyid='0F2446E70C90BD31',
+        creation_date=datetime.datetime(2018, 8, 2, 22, 0),
+        expiration_date=datetime.datetime(2020, 8, 1, 22, 0, 3),
+        key_caps='cESC',
         curve='',
         subkeys=[
             Key(
                 validity=Validity.NO_VALUE,
                 key_length=4096,
                 key_algo=KeyAlgo.RSA,
-                keyid='14F0813D42225877',
-                creation_date=datetime.datetime(2018, 8, 2, 11, 46, 3),
-                expiration_date=datetime.datetime(2019, 8, 2, 11, 46, 3),
+                keyid='3F911DBFC4B51F74',
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 1),
+                expiration_date=datetime.datetime(2019, 8, 2, 22, 0, 1),
                 key_caps='s',
+                curve='',
+            ),
+            Key(
+                validity=Validity.NO_VALUE,
+                key_length=4096,
+                key_algo=KeyAlgo.RSA,
+                keyid='44C9C2CFA6974493',
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 1),
+                expiration_date=datetime.datetime(2019, 8, 2, 22, 0, 1),
+                key_caps='e',
                 curve='',
             ),
         ],
         uids=[
             UID(
                 validity=Validity.NO_VALUE,
-                creation_date=datetime.datetime(2018, 8, 2, 11, 53, 23),
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 3),
                 expiration_date=None,
                 uid_hash='0DAFDC73F43FC173C2216BA2BB4928391676BF2F',
                 user_id='GLEP63 test key <nobody@gentoo.org>',
@@ -175,6 +258,7 @@ fpr:::::::::693AE5F2C1CCE7CA30FF07F214F0813D42225877:
         'glep63-1-strict': [],
         'glep63-2': [],
         'glep63-2-draft-20180707': [],
+        'glep63-2.1': [],
     }
 
 
@@ -182,38 +266,51 @@ class PrimaryKeyOneWeekExpirationTest(tests.key_base.BaseKeyTest):
     KEY_FILE = 'expiration/primary-1w.gpg'
 
     GPG_COLONS = '''
-pub:-:4096:1:CFD4B3EC01FB9A51:1533210309:1533815624::-:::scSC::::::23::0:
-fpr:::::::::8386FCEB4CE07C9FA30F9E71CFD4B3EC01FB9A51:
-uid:-::::1533210824::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <nobody@gentoo.org>::::::::::0:
-sub:-:4096:1:14F0813D42225877:1533210363:1564746363:::::s::::::23:
-fpr:::::::::693AE5F2C1CCE7CA30FF07F214F0813D42225877:
+tru::1:1556681170:1560354194:3:1:5
+pub:-:4096:1:0F2446E70C90BD31:1533247200:1533852004::-:::cESC::::::23::0:
+fpr:::::::::4D94D1CD1D552073A6579CE70F2446E70C90BD31:
+uid:-::::1533247204::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <nobody@gentoo.org>::::::::::0:
+sub:-:4096:1:3F911DBFC4B51F74:1533247201:1564783201:::::s::::::23:
+fpr:::::::::26BF2B75CB42D5803C615AF43F911DBFC4B51F74:
+sub:-:4096:1:44C9C2CFA6974493:1533247201:1564783201:::::e::::::23:
+fpr:::::::::CF8439AF79B439E0D9D7C99B44C9C2CFA6974493:
 '''
 
     KEY = PublicKey(
         validity=Validity.NO_VALUE,
         key_length=4096,
         key_algo=KeyAlgo.RSA,
-        keyid='CFD4B3EC01FB9A51',
-        creation_date=datetime.datetime(2018, 8, 2, 11, 45, 9),
-        expiration_date=datetime.datetime(2018, 8, 9, 11, 53, 44),
-        key_caps='scSC',
+        keyid='0F2446E70C90BD31',
+        creation_date=datetime.datetime(2018, 8, 2, 22, 0),
+        expiration_date=datetime.datetime(2018, 8, 9, 22, 0, 4),
+        key_caps='cESC',
         curve='',
         subkeys=[
             Key(
                 validity=Validity.NO_VALUE,
                 key_length=4096,
                 key_algo=KeyAlgo.RSA,
-                keyid='14F0813D42225877',
-                creation_date=datetime.datetime(2018, 8, 2, 11, 46, 3),
-                expiration_date=datetime.datetime(2019, 8, 2, 11, 46, 3),
+                keyid='3F911DBFC4B51F74',
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 1),
+                expiration_date=datetime.datetime(2019, 8, 2, 22, 0, 1),
                 key_caps='s',
+                curve='',
+            ),
+            Key(
+                validity=Validity.NO_VALUE,
+                key_length=4096,
+                key_algo=KeyAlgo.RSA,
+                keyid='44C9C2CFA6974493',
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 1),
+                expiration_date=datetime.datetime(2019, 8, 2, 22, 0, 1),
+                key_caps='e',
                 curve='',
             ),
         ],
         uids=[
             UID(
                 validity=Validity.NO_VALUE,
-                creation_date=datetime.datetime(2018, 8, 2, 11, 53, 44),
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 4),
                 expiration_date=None,
                 uid_hash='0DAFDC73F43FC173C2216BA2BB4928391676BF2F',
                 user_id='GLEP63 test key <nobody@gentoo.org>',
@@ -221,23 +318,49 @@ fpr:::::::::693AE5F2C1CCE7CA30FF07F214F0813D42225877:
         ],
     )
 
-    RENEW_WARNING = KeyWarning(
-        key=KEY,
-        machine_desc='expire:short',
-        long_desc='',
-    )
-    RENEW_ISSUE = KeyIssue(
-        key=KEY,
-        machine_desc='expire:short',
-        long_desc='',
-    )
-
     EXPECTED_RESULTS = {
-        'glep63-1-rsa2048': [RENEW_WARNING],
-        'glep63-1-rsa2048-ec25519': [RENEW_WARNING],
-        'glep63-1-strict': [RENEW_WARNING],
-        'glep63-2': [RENEW_ISSUE],
-        'glep63-2-draft-20180707': [RENEW_ISSUE],
+        'glep63-1-rsa2048': [
+            KeyWarning(
+                key=KEY,
+                machine_desc='expire:short',
+                long_desc='',
+            ),
+        ],
+        'glep63-1-rsa2048-ec25519': [
+            KeyWarning(
+                key=KEY,
+                machine_desc='expire:short',
+                long_desc='',
+            ),
+        ],
+        'glep63-1-strict': [
+            KeyWarning(
+                key=KEY,
+                machine_desc='expire:short',
+                long_desc='',
+            ),
+        ],
+        'glep63-2': [
+            KeyIssue(
+                key=KEY,
+                machine_desc='expire:short',
+                long_desc='',
+            ),
+        ],
+        'glep63-2-draft-20180707': [
+            KeyIssue(
+                key=KEY,
+                machine_desc='expire:short',
+                long_desc='',
+            ),
+        ],
+        'glep63-2.1': [
+            KeyIssue(
+                key=KEY,
+                machine_desc='expire:short',
+                long_desc='',
+            ),
+        ],
     }
 
 
@@ -245,38 +368,51 @@ class PrimaryKeyFiveYearExpirationTest(tests.key_base.BaseKeyTest):
     KEY_FILE = 'expiration/primary-5y.gpg'
 
     GPG_COLONS = '''
-pub:-:4096:1:CFD4B3EC01FB9A51:1533210309:1690890880::-:::scSC::::::23::0:
-fpr:::::::::8386FCEB4CE07C9FA30F9E71CFD4B3EC01FB9A51:
-uid:-::::1533210880::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <nobody@gentoo.org>::::::::::0:
-sub:-:4096:1:14F0813D42225877:1533210363:1564746363:::::s::::::23:
-fpr:::::::::693AE5F2C1CCE7CA30FF07F214F0813D42225877:
+tru::1:1556681170:1560354194:3:1:5
+pub:-:4096:1:0F2446E70C90BD31:1533247200:1690927205::-:::cESC::::::23::0:
+fpr:::::::::4D94D1CD1D552073A6579CE70F2446E70C90BD31:
+uid:-::::1533247205::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <nobody@gentoo.org>::::::::::0:
+sub:-:4096:1:3F911DBFC4B51F74:1533247201:1564783201:::::s::::::23:
+fpr:::::::::26BF2B75CB42D5803C615AF43F911DBFC4B51F74:
+sub:-:4096:1:44C9C2CFA6974493:1533247201:1564783201:::::e::::::23:
+fpr:::::::::CF8439AF79B439E0D9D7C99B44C9C2CFA6974493:
 '''
 
     KEY = PublicKey(
         validity=Validity.NO_VALUE,
         key_length=4096,
         key_algo=KeyAlgo.RSA,
-        keyid='CFD4B3EC01FB9A51',
-        creation_date=datetime.datetime(2018, 8, 2, 11, 45, 9),
-        expiration_date=datetime.datetime(2023, 8, 1, 11, 54, 40),
-        key_caps='scSC',
+        keyid='0F2446E70C90BD31',
+        creation_date=datetime.datetime(2018, 8, 2, 22, 0),
+        expiration_date=datetime.datetime(2023, 8, 1, 22, 0, 5),
+        key_caps='cESC',
         curve='',
         subkeys=[
             Key(
                 validity=Validity.NO_VALUE,
                 key_length=4096,
                 key_algo=KeyAlgo.RSA,
-                keyid='14F0813D42225877',
-                creation_date=datetime.datetime(2018, 8, 2, 11, 46, 3),
-                expiration_date=datetime.datetime(2019, 8, 2, 11, 46, 3),
+                keyid='3F911DBFC4B51F74',
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 1),
+                expiration_date=datetime.datetime(2019, 8, 2, 22, 0, 1),
                 key_caps='s',
+                curve='',
+            ),
+            Key(
+                validity=Validity.NO_VALUE,
+                key_length=4096,
+                key_algo=KeyAlgo.RSA,
+                keyid='44C9C2CFA6974493',
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 1),
+                expiration_date=datetime.datetime(2019, 8, 2, 22, 0, 1),
+                key_caps='e',
                 curve='',
             ),
         ],
         uids=[
             UID(
                 validity=Validity.NO_VALUE,
-                creation_date=datetime.datetime(2018, 8, 2, 11, 54, 40),
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 5),
                 expiration_date=None,
                 uid_hash='0DAFDC73F43FC173C2216BA2BB4928391676BF2F',
                 user_id='GLEP63 test key <nobody@gentoo.org>',
@@ -284,23 +420,49 @@ fpr:::::::::693AE5F2C1CCE7CA30FF07F214F0813D42225877:
         ],
     )
 
-    V1_ISSUE = KeyWarning(
-        key=KEY,
-        machine_desc='expire:long',
-        long_desc='',
-    )
-    V2_ISSUE = KeyIssue(
-        key=KEY,
-        machine_desc='expire:long',
-        long_desc='',
-    )
-
     EXPECTED_RESULTS = {
-        'glep63-1-rsa2048': [V1_ISSUE],
-        'glep63-1-rsa2048-ec25519': [V1_ISSUE],
-        'glep63-1-strict': [V1_ISSUE],
-        'glep63-2': [V2_ISSUE],
-        'glep63-2-draft-20180707': [V2_ISSUE],
+        'glep63-1-rsa2048': [
+            KeyWarning(
+                key=KEY,
+                machine_desc='expire:long',
+                long_desc='',
+            ),
+        ],
+        'glep63-1-rsa2048-ec25519': [
+            KeyWarning(
+                key=KEY,
+                machine_desc='expire:long',
+                long_desc='',
+            ),
+        ],
+        'glep63-1-strict': [
+            KeyWarning(
+                key=KEY,
+                machine_desc='expire:long',
+                long_desc='',
+            ),
+        ],
+        'glep63-2': [
+            KeyIssue(
+                key=KEY,
+                machine_desc='expire:long',
+                long_desc='',
+            ),
+        ],
+        'glep63-2-draft-20180707': [
+            KeyIssue(
+                key=KEY,
+                machine_desc='expire:long',
+                long_desc='',
+            ),
+        ],
+        'glep63-2.1': [
+            KeyIssue(
+                key=KEY,
+                machine_desc='expire:long',
+                long_desc='',
+            ),
+        ],
     }
 
 
@@ -308,38 +470,51 @@ class PrimaryKeySixYearExpirationTest(tests.key_base.BaseKeyTest):
     KEY_FILE = 'expiration/primary-6y.gpg'
 
     GPG_COLONS = '''
-pub:-:4096:1:CFD4B3EC01FB9A51:1533210309:1722426894::-:::scSC::::::23::0:
-fpr:::::::::8386FCEB4CE07C9FA30F9E71CFD4B3EC01FB9A51:
-uid:-::::1533210894::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <nobody@gentoo.org>::::::::::0:
-sub:-:4096:1:14F0813D42225877:1533210363:1564746363:::::s::::::23:
-fpr:::::::::693AE5F2C1CCE7CA30FF07F214F0813D42225877:
+tru::1:1556681170:1560354194:3:1:5
+pub:-:4096:1:0F2446E70C90BD31:1533247200:1722463206::-:::cESC::::::23::0:
+fpr:::::::::4D94D1CD1D552073A6579CE70F2446E70C90BD31:
+uid:-::::1533247206::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <nobody@gentoo.org>::::::::::0:
+sub:-:4096:1:3F911DBFC4B51F74:1533247201:1564783201:::::s::::::23:
+fpr:::::::::26BF2B75CB42D5803C615AF43F911DBFC4B51F74:
+sub:-:4096:1:44C9C2CFA6974493:1533247201:1564783201:::::e::::::23:
+fpr:::::::::CF8439AF79B439E0D9D7C99B44C9C2CFA6974493:
 '''
 
     KEY = PublicKey(
         validity=Validity.NO_VALUE,
         key_length=4096,
         key_algo=KeyAlgo.RSA,
-        keyid='CFD4B3EC01FB9A51',
-        creation_date=datetime.datetime(2018, 8, 2, 11, 45, 9),
-        expiration_date=datetime.datetime(2024, 7, 31, 11, 54, 54),
-        key_caps='scSC',
+        keyid='0F2446E70C90BD31',
+        creation_date=datetime.datetime(2018, 8, 2, 22, 0),
+        expiration_date=datetime.datetime(2024, 7, 31, 22, 0, 6),
+        key_caps='cESC',
         curve='',
         subkeys=[
             Key(
                 validity=Validity.NO_VALUE,
                 key_length=4096,
                 key_algo=KeyAlgo.RSA,
-                keyid='14F0813D42225877',
-                creation_date=datetime.datetime(2018, 8, 2, 11, 46, 3),
-                expiration_date=datetime.datetime(2019, 8, 2, 11, 46, 3),
+                keyid='3F911DBFC4B51F74',
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 1),
+                expiration_date=datetime.datetime(2019, 8, 2, 22, 0, 1),
                 key_caps='s',
+                curve='',
+            ),
+            Key(
+                validity=Validity.NO_VALUE,
+                key_length=4096,
+                key_algo=KeyAlgo.RSA,
+                keyid='44C9C2CFA6974493',
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 1),
+                expiration_date=datetime.datetime(2019, 8, 2, 22, 0, 1),
+                key_caps='e',
                 curve='',
             ),
         ],
         uids=[
             UID(
                 validity=Validity.NO_VALUE,
-                creation_date=datetime.datetime(2018, 8, 2, 11, 54, 54),
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 6),
                 expiration_date=None,
                 uid_hash='0DAFDC73F43FC173C2216BA2BB4928391676BF2F',
                 user_id='GLEP63 test key <nobody@gentoo.org>',
@@ -347,18 +522,49 @@ fpr:::::::::693AE5F2C1CCE7CA30FF07F214F0813D42225877:
         ],
     )
 
-    COMMON_ISSUE = KeyIssue(
-        key=KEY,
-        machine_desc='expire:long',
-        long_desc='',
-    )
-
     EXPECTED_RESULTS = {
-        'glep63-1-rsa2048': [COMMON_ISSUE],
-        'glep63-1-rsa2048-ec25519': [COMMON_ISSUE],
-        'glep63-1-strict': [COMMON_ISSUE],
-        'glep63-2': [COMMON_ISSUE],
-        'glep63-2-draft-20180707': [COMMON_ISSUE],
+        'glep63-1-rsa2048': [
+            KeyIssue(
+                key=KEY,
+                machine_desc='expire:long',
+                long_desc='',
+            ),
+        ],
+        'glep63-1-rsa2048-ec25519': [
+            KeyIssue(
+                key=KEY,
+                machine_desc='expire:long',
+                long_desc='',
+            ),
+        ],
+        'glep63-1-strict': [
+            KeyIssue(
+                key=KEY,
+                machine_desc='expire:long',
+                long_desc='',
+            ),
+        ],
+        'glep63-2': [
+            KeyIssue(
+                key=KEY,
+                machine_desc='expire:long',
+                long_desc='',
+            ),
+        ],
+        'glep63-2-draft-20180707': [
+            KeyIssue(
+                key=KEY,
+                machine_desc='expire:long',
+                long_desc='',
+            ),
+        ],
+        'glep63-2.1': [
+            KeyIssue(
+                key=KEY,
+                machine_desc='expire:long',
+                long_desc='',
+            ),
+        ],
     }
 
 
@@ -366,38 +572,51 @@ class SubKeyNoExpirationTest(tests.key_base.BaseKeyTest):
     KEY_FILE = 'expiration/subkey-noexpire.gpg'
 
     GPG_COLONS = '''
-pub:-:4096:1:CFD4B3EC01FB9A51:1533210309:1596283281::-:::scSC::::::23::0:
-fpr:::::::::8386FCEB4CE07C9FA30F9E71CFD4B3EC01FB9A51:
-uid:-::::1533211281::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <nobody@gentoo.org>::::::::::0:
-sub:-:4096:1:14F0813D42225877:1533210363::::::s::::::23:
-fpr:::::::::693AE5F2C1CCE7CA30FF07F214F0813D42225877:
+tru::1:1556681170:1560354194:3:1:5
+pub:-:4096:1:0F2446E70C90BD31:1533247200:1564783207::-:::cESC::::::23::0:
+fpr:::::::::4D94D1CD1D552073A6579CE70F2446E70C90BD31:
+uid:-::::1533247207::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <nobody@gentoo.org>::::::::::0:
+sub:-:4096:1:3F911DBFC4B51F74:1533247201::::::s::::::23:
+fpr:::::::::26BF2B75CB42D5803C615AF43F911DBFC4B51F74:
+sub:-:4096:1:44C9C2CFA6974493:1533247201::::::e::::::23:
+fpr:::::::::CF8439AF79B439E0D9D7C99B44C9C2CFA6974493:
 '''
 
     KEY = PublicKey(
         validity=Validity.NO_VALUE,
         key_length=4096,
         key_algo=KeyAlgo.RSA,
-        keyid='CFD4B3EC01FB9A51',
-        creation_date=datetime.datetime(2018, 8, 2, 11, 45, 9),
-        expiration_date=datetime.datetime(2020, 8, 1, 12, 1, 21),
-        key_caps='scSC',
+        keyid='0F2446E70C90BD31',
+        creation_date=datetime.datetime(2018, 8, 2, 22, 0),
+        expiration_date=datetime.datetime(2019, 8, 2, 22, 0, 7),
+        key_caps='cESC',
         curve='',
         subkeys=[
             Key(
                 validity=Validity.NO_VALUE,
                 key_length=4096,
                 key_algo=KeyAlgo.RSA,
-                keyid='14F0813D42225877',
-                creation_date=datetime.datetime(2018, 8, 2, 11, 46, 3),
+                keyid='3F911DBFC4B51F74',
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 1),
                 expiration_date=None,
                 key_caps='s',
+                curve='',
+            ),
+            Key(
+                validity=Validity.NO_VALUE,
+                key_length=4096,
+                key_algo=KeyAlgo.RSA,
+                keyid='44C9C2CFA6974493',
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 1),
+                expiration_date=None,
+                key_caps='e',
                 curve='',
             ),
         ],
         uids=[
             UID(
                 validity=Validity.NO_VALUE,
-                creation_date=datetime.datetime(2018, 8, 2, 12, 1, 21),
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 7),
                 expiration_date=None,
                 uid_hash='0DAFDC73F43FC173C2216BA2BB4928391676BF2F',
                 user_id='GLEP63 test key <nobody@gentoo.org>',
@@ -405,19 +624,61 @@ fpr:::::::::693AE5F2C1CCE7CA30FF07F214F0813D42225877:
         ],
     )
 
-    COMMON_ISSUE = SubKeyIssue(
-        key=KEY,
-        subkey=KEY.subkeys[0],
-        machine_desc='expire:none',
-        long_desc='',
-    )
-
     EXPECTED_RESULTS = {
-        'glep63-1-rsa2048': [COMMON_ISSUE],
-        'glep63-1-rsa2048-ec25519': [COMMON_ISSUE],
-        'glep63-1-strict': [COMMON_ISSUE],
-        'glep63-2': [COMMON_ISSUE],
-        'glep63-2-draft-20180707': [COMMON_ISSUE],
+        'glep63-1-rsa2048': [
+            SubKeyIssue(
+                key=KEY,
+                subkey=KEY.subkeys[0],
+                machine_desc='expire:none',
+                long_desc='',
+            ),
+        ],
+        'glep63-1-rsa2048-ec25519': [
+            SubKeyIssue(
+                key=KEY,
+                subkey=KEY.subkeys[0],
+                machine_desc='expire:none',
+                long_desc='',
+            ),
+        ],
+        'glep63-1-strict': [
+            SubKeyIssue(
+                key=KEY,
+                subkey=KEY.subkeys[0],
+                machine_desc='expire:none',
+                long_desc='',
+            ),
+        ],
+        'glep63-2': [
+            SubKeyIssue(
+                key=KEY,
+                subkey=KEY.subkeys[0],
+                machine_desc='expire:none',
+                long_desc='',
+            ),
+        ],
+        'glep63-2-draft-20180707': [
+            SubKeyIssue(
+                key=KEY,
+                subkey=KEY.subkeys[0],
+                machine_desc='expire:none',
+                long_desc='',
+            ),
+        ],
+        'glep63-2.1': [
+            SubKeyIssue(
+                key=KEY,
+                subkey=KEY.subkeys[0],
+                machine_desc='expire:none',
+                long_desc='',
+            ),
+            SubKeyIssue(
+                key=KEY,
+                subkey=KEY.subkeys[1],
+                machine_desc='expire:none',
+                long_desc='',
+            ),
+        ],
     }
 
 
@@ -425,38 +686,51 @@ class SubKeySixYearExpirationTest(tests.key_base.BaseKeyTest):
     KEY_FILE = 'expiration/subkey-6y.gpg'
 
     GPG_COLONS = '''
-pub:-:4096:1:CFD4B3EC01FB9A51:1533210309:1596283281::-:::scSC::::::23::0:
-fpr:::::::::8386FCEB4CE07C9FA30F9E71CFD4B3EC01FB9A51:
-uid:-::::1533211281::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <nobody@gentoo.org>::::::::::0:
-sub:-:4096:1:14F0813D42225877:1533210363:1722427329:::::s::::::23:
-fpr:::::::::693AE5F2C1CCE7CA30FF07F214F0813D42225877:
+tru::1:1556681170:1560354194:3:1:5
+pub:-:4096:1:0F2446E70C90BD31:1533247200:1564783207::-:::cESC::::::23::0:
+fpr:::::::::4D94D1CD1D552073A6579CE70F2446E70C90BD31:
+uid:-::::1533247207::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <nobody@gentoo.org>::::::::::0:
+sub:-:4096:1:3F911DBFC4B51F74:1533247201:1722463208:::::s::::::23:
+fpr:::::::::26BF2B75CB42D5803C615AF43F911DBFC4B51F74:
+sub:-:4096:1:44C9C2CFA6974493:1533247201:1722463208:::::e::::::23:
+fpr:::::::::CF8439AF79B439E0D9D7C99B44C9C2CFA6974493:
 '''
 
     KEY = PublicKey(
         validity=Validity.NO_VALUE,
         key_length=4096,
         key_algo=KeyAlgo.RSA,
-        keyid='CFD4B3EC01FB9A51',
-        creation_date=datetime.datetime(2018, 8, 2, 11, 45, 9),
-        expiration_date=datetime.datetime(2020, 8, 1, 12, 1, 21),
-        key_caps='scSC',
+        keyid='0F2446E70C90BD31',
+        creation_date=datetime.datetime(2018, 8, 2, 22, 0),
+        expiration_date=datetime.datetime(2019, 8, 2, 22, 0, 7),
+        key_caps='cESC',
         curve='',
         subkeys=[
             Key(
                 validity=Validity.NO_VALUE,
                 key_length=4096,
                 key_algo=KeyAlgo.RSA,
-                keyid='14F0813D42225877',
-                creation_date=datetime.datetime(2018, 8, 2, 11, 46, 3),
-                expiration_date=datetime.datetime(2024, 7, 31, 12, 2, 9),
+                keyid='3F911DBFC4B51F74',
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 1),
+                expiration_date=datetime.datetime(2024, 7, 31, 22, 0, 8),
                 key_caps='s',
+                curve='',
+            ),
+            Key(
+                validity=Validity.NO_VALUE,
+                key_length=4096,
+                key_algo=KeyAlgo.RSA,
+                keyid='44C9C2CFA6974493',
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 1),
+                expiration_date=datetime.datetime(2024, 7, 31, 22, 0, 8),
+                key_caps='e',
                 curve='',
             ),
         ],
         uids=[
             UID(
                 validity=Validity.NO_VALUE,
-                creation_date=datetime.datetime(2018, 8, 2, 12, 1, 21),
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 7),
                 expiration_date=None,
                 uid_hash='0DAFDC73F43FC173C2216BA2BB4928391676BF2F',
                 user_id='GLEP63 test key <nobody@gentoo.org>',
@@ -464,19 +738,61 @@ fpr:::::::::693AE5F2C1CCE7CA30FF07F214F0813D42225877:
         ],
     )
 
-    COMMON_ISSUE = SubKeyIssue(
-        key=KEY,
-        subkey=KEY.subkeys[0],
-        machine_desc='expire:long',
-        long_desc='',
-    )
-
     EXPECTED_RESULTS = {
-        'glep63-1-rsa2048': [COMMON_ISSUE],
-        'glep63-1-rsa2048-ec25519': [COMMON_ISSUE],
-        'glep63-1-strict': [COMMON_ISSUE],
-        'glep63-2': [COMMON_ISSUE],
-        'glep63-2-draft-20180707': [COMMON_ISSUE],
+        'glep63-1-rsa2048': [
+            SubKeyIssue(
+                key=KEY,
+                subkey=KEY.subkeys[0],
+                machine_desc='expire:long',
+                long_desc='',
+            ),
+        ],
+        'glep63-1-rsa2048-ec25519': [
+            SubKeyIssue(
+                key=KEY,
+                subkey=KEY.subkeys[0],
+                machine_desc='expire:long',
+                long_desc='',
+            ),
+        ],
+        'glep63-1-strict': [
+            SubKeyIssue(
+                key=KEY,
+                subkey=KEY.subkeys[0],
+                machine_desc='expire:long',
+                long_desc='',
+            ),
+        ],
+        'glep63-2': [
+            SubKeyIssue(
+                key=KEY,
+                subkey=KEY.subkeys[0],
+                machine_desc='expire:long',
+                long_desc='',
+            ),
+        ],
+        'glep63-2-draft-20180707': [
+            SubKeyIssue(
+                key=KEY,
+                subkey=KEY.subkeys[0],
+                machine_desc='expire:long',
+                long_desc='',
+            ),
+        ],
+        'glep63-2.1': [
+            SubKeyIssue(
+                key=KEY,
+                subkey=KEY.subkeys[0],
+                machine_desc='expire:long',
+                long_desc='',
+            ),
+            SubKeyIssue(
+                key=KEY,
+                subkey=KEY.subkeys[1],
+                machine_desc='expire:long',
+                long_desc='',
+            ),
+        ],
     }
 
 
@@ -484,38 +800,51 @@ class SubKeyFiveYearExpirationTest(tests.key_base.BaseKeyTest):
     KEY_FILE = 'expiration/subkey-5y.gpg'
 
     GPG_COLONS = '''
-pub:-:4096:1:CFD4B3EC01FB9A51:1533210309:1596283281::-:::scSC::::::23::0:
-fpr:::::::::8386FCEB4CE07C9FA30F9E71CFD4B3EC01FB9A51:
-uid:-::::1533211281::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <nobody@gentoo.org>::::::::::0:
-sub:-:4096:1:14F0813D42225877:1533210363:1690891344:::::s::::::23:
-fpr:::::::::693AE5F2C1CCE7CA30FF07F214F0813D42225877:
+tru::1:1556681170:1560354194:3:1:5
+pub:-:4096:1:0F2446E70C90BD31:1533247200:1564783207::-:::cESC::::::23::0:
+fpr:::::::::4D94D1CD1D552073A6579CE70F2446E70C90BD31:
+uid:-::::1533247207::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <nobody@gentoo.org>::::::::::0:
+sub:-:4096:1:3F911DBFC4B51F74:1533247201:1690927209:::::s::::::23:
+fpr:::::::::26BF2B75CB42D5803C615AF43F911DBFC4B51F74:
+sub:-:4096:1:44C9C2CFA6974493:1533247201:1690927209:::::e::::::23:
+fpr:::::::::CF8439AF79B439E0D9D7C99B44C9C2CFA6974493:
 '''
 
     KEY = PublicKey(
         validity=Validity.NO_VALUE,
         key_length=4096,
         key_algo=KeyAlgo.RSA,
-        keyid='CFD4B3EC01FB9A51',
-        creation_date=datetime.datetime(2018, 8, 2, 11, 45, 9),
-        expiration_date=datetime.datetime(2020, 8, 1, 12, 1, 21),
-        key_caps='scSC',
+        keyid='0F2446E70C90BD31',
+        creation_date=datetime.datetime(2018, 8, 2, 22, 0),
+        expiration_date=datetime.datetime(2019, 8, 2, 22, 0, 7),
+        key_caps='cESC',
         curve='',
         subkeys=[
             Key(
                 validity=Validity.NO_VALUE,
                 key_length=4096,
                 key_algo=KeyAlgo.RSA,
-                keyid='14F0813D42225877',
-                creation_date=datetime.datetime(2018, 8, 2, 11, 46, 3),
-                expiration_date=datetime.datetime(2023, 8, 1, 12, 2, 24),
+                keyid='3F911DBFC4B51F74',
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 1),
+                expiration_date=datetime.datetime(2023, 8, 1, 22, 0, 9),
                 key_caps='s',
+                curve='',
+            ),
+            Key(
+                validity=Validity.NO_VALUE,
+                key_length=4096,
+                key_algo=KeyAlgo.RSA,
+                keyid='44C9C2CFA6974493',
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 1),
+                expiration_date=datetime.datetime(2023, 8, 1, 22, 0, 9),
+                key_caps='e',
                 curve='',
             ),
         ],
         uids=[
             UID(
                 validity=Validity.NO_VALUE,
-                creation_date=datetime.datetime(2018, 8, 2, 12, 1, 21),
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 7),
                 expiration_date=None,
                 uid_hash='0DAFDC73F43FC173C2216BA2BB4928391676BF2F',
                 user_id='GLEP63 test key <nobody@gentoo.org>',
@@ -523,26 +852,61 @@ fpr:::::::::693AE5F2C1CCE7CA30FF07F214F0813D42225877:
         ],
     )
 
-    V1_ISSUE = SubKeyWarning(
-        key=KEY,
-        subkey=KEY.subkeys[0],
-        machine_desc='expire:long',
-        long_desc='',
-    )
-
-    V2_ISSUE = SubKeyIssue(
-        key=KEY,
-        subkey=KEY.subkeys[0],
-        machine_desc='expire:long',
-        long_desc='',
-    )
-
     EXPECTED_RESULTS = {
-        'glep63-1-rsa2048': [V1_ISSUE],
-        'glep63-1-rsa2048-ec25519': [V1_ISSUE],
-        'glep63-1-strict': [V1_ISSUE],
-        'glep63-2': [V2_ISSUE],
-        'glep63-2-draft-20180707': [V2_ISSUE],
+        'glep63-1-rsa2048': [
+            SubKeyWarning(
+                key=KEY,
+                subkey=KEY.subkeys[0],
+                machine_desc='expire:long',
+                long_desc='',
+            ),
+        ],
+        'glep63-1-rsa2048-ec25519': [
+            SubKeyWarning(
+                key=KEY,
+                subkey=KEY.subkeys[0],
+                machine_desc='expire:long',
+                long_desc='',
+            ),
+        ],
+        'glep63-1-strict': [
+            SubKeyWarning(
+                key=KEY,
+                subkey=KEY.subkeys[0],
+                machine_desc='expire:long',
+                long_desc='',
+            ),
+        ],
+        'glep63-2': [
+            SubKeyIssue(
+                key=KEY,
+                subkey=KEY.subkeys[0],
+                machine_desc='expire:long',
+                long_desc='',
+            ),
+        ],
+        'glep63-2-draft-20180707': [
+            SubKeyIssue(
+                key=KEY,
+                subkey=KEY.subkeys[0],
+                machine_desc='expire:long',
+                long_desc='',
+            ),
+        ],
+        'glep63-2.1': [
+            SubKeyIssue(
+                key=KEY,
+                subkey=KEY.subkeys[0],
+                machine_desc='expire:long',
+                long_desc='',
+            ),
+            SubKeyIssue(
+                key=KEY,
+                subkey=KEY.subkeys[1],
+                machine_desc='expire:long',
+                long_desc='',
+            ),
+        ],
     }
 
 
@@ -550,97 +914,51 @@ class SubKeyTwoYearExpirationTest(tests.key_base.BaseKeyTest):
     KEY_FILE = 'expiration/subkey-2y.gpg'
 
     GPG_COLONS = '''
-pub:-:4096:1:CFD4B3EC01FB9A51:1533210309:1596283281::-:::scSC::::::23::0:
-fpr:::::::::8386FCEB4CE07C9FA30F9E71CFD4B3EC01FB9A51:
-uid:-::::1533211281::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <nobody@gentoo.org>::::::::::0:
-sub:-:4096:1:14F0813D42225877:1533210363:1596283376:::::s::::::23:
-fpr:::::::::693AE5F2C1CCE7CA30FF07F214F0813D42225877:
+tru::1:1556681170:1560354194:3:1:5
+pub:-:4096:1:0F2446E70C90BD31:1533247200:1564783207::-:::cESC::::::23::0:
+fpr:::::::::4D94D1CD1D552073A6579CE70F2446E70C90BD31:
+uid:-::::1533247207::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <nobody@gentoo.org>::::::::::0:
+sub:-:4096:1:3F911DBFC4B51F74:1533247201:1596319210:::::s::::::23:
+fpr:::::::::26BF2B75CB42D5803C615AF43F911DBFC4B51F74:
+sub:-:4096:1:44C9C2CFA6974493:1533247201:1596319210:::::e::::::23:
+fpr:::::::::CF8439AF79B439E0D9D7C99B44C9C2CFA6974493:
 '''
 
     KEY = PublicKey(
         validity=Validity.NO_VALUE,
         key_length=4096,
         key_algo=KeyAlgo.RSA,
-        keyid='CFD4B3EC01FB9A51',
-        creation_date=datetime.datetime(2018, 8, 2, 11, 45, 9),
-        expiration_date=datetime.datetime(2020, 8, 1, 12, 1, 21),
-        key_caps='scSC',
+        keyid='0F2446E70C90BD31',
+        creation_date=datetime.datetime(2018, 8, 2, 22, 0),
+        expiration_date=datetime.datetime(2019, 8, 2, 22, 0, 7),
+        key_caps='cESC',
         curve='',
         subkeys=[
             Key(
                 validity=Validity.NO_VALUE,
                 key_length=4096,
                 key_algo=KeyAlgo.RSA,
-                keyid='14F0813D42225877',
-                creation_date=datetime.datetime(2018, 8, 2, 11, 46, 3),
-                expiration_date=datetime.datetime(2020, 8, 1, 12, 2, 56),
+                keyid='3F911DBFC4B51F74',
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 1),
+                expiration_date=datetime.datetime(2020, 8, 1, 22, 0, 10),
                 key_caps='s',
                 curve='',
             ),
-        ],
-        uids=[
-            UID(
-                validity=Validity.NO_VALUE,
-                creation_date=datetime.datetime(2018, 8, 2, 12, 1, 21),
-                expiration_date=None,
-                uid_hash='0DAFDC73F43FC173C2216BA2BB4928391676BF2F',
-                user_id='GLEP63 test key <nobody@gentoo.org>',
-            ),
-        ],
-    )
-
-    V1_ISSUE = SubKeyWarning(
-        key=KEY,
-        subkey=KEY.subkeys[0],
-        machine_desc='expire:long',
-        long_desc='',
-    )
-
-    EXPECTED_RESULTS = {
-        'glep63-1-rsa2048': [V1_ISSUE],
-        'glep63-1-rsa2048-ec25519': [V1_ISSUE],
-        'glep63-1-strict': [V1_ISSUE],
-        'glep63-2': [],
-        'glep63-2-draft-20180707': [],
-    }
-
-
-class SubKeyOneYearExpirationTest(tests.key_base.BaseKeyTest):
-    KEY_FILE = 'expiration/subkey-1y.gpg'
-
-    GPG_COLONS = '''
-pub:-:4096:1:CFD4B3EC01FB9A51:1533210309:1596283281::-:::scSC::::::23::0:
-fpr:::::::::8386FCEB4CE07C9FA30F9E71CFD4B3EC01FB9A51:
-uid:-::::1533211281::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <nobody@gentoo.org>::::::::::0:
-sub:-:4096:1:14F0813D42225877:1533210363:1564747387:::::s::::::23:
-fpr:::::::::693AE5F2C1CCE7CA30FF07F214F0813D42225877:
-'''
-
-    KEY = PublicKey(
-        validity=Validity.NO_VALUE,
-        key_length=4096,
-        key_algo=KeyAlgo.RSA,
-        keyid='CFD4B3EC01FB9A51',
-        creation_date=datetime.datetime(2018, 8, 2, 11, 45, 9),
-        expiration_date=datetime.datetime(2020, 8, 1, 12, 1, 21),
-        key_caps='scSC',
-        curve='',
-        subkeys=[
             Key(
                 validity=Validity.NO_VALUE,
                 key_length=4096,
                 key_algo=KeyAlgo.RSA,
-                keyid='14F0813D42225877',
-                creation_date=datetime.datetime(2018, 8, 2, 11, 46, 3),
-                expiration_date=datetime.datetime(2019, 8, 2, 12, 3, 7),
-                key_caps='s',
+                keyid='44C9C2CFA6974493',
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 1),
+                expiration_date=datetime.datetime(2020, 8, 1, 22, 0, 10),
+                key_caps='e',
                 curve='',
             ),
         ],
         uids=[
             UID(
                 validity=Validity.NO_VALUE,
-                creation_date=datetime.datetime(2018, 8, 2, 12, 1, 21),
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 7),
                 expiration_date=None,
                 uid_hash='0DAFDC73F43FC173C2216BA2BB4928391676BF2F',
                 user_id='GLEP63 test key <nobody@gentoo.org>',
@@ -649,11 +967,33 @@ fpr:::::::::693AE5F2C1CCE7CA30FF07F214F0813D42225877:
     )
 
     EXPECTED_RESULTS = {
-        'glep63-1-rsa2048': [],
-        'glep63-1-rsa2048-ec25519': [],
-        'glep63-1-strict': [],
+        'glep63-1-rsa2048': [
+            SubKeyWarning(
+                key=KEY,
+                subkey=KEY.subkeys[0],
+                machine_desc='expire:long',
+                long_desc='',
+            ),
+        ],
+        'glep63-1-rsa2048-ec25519': [
+            SubKeyWarning(
+                key=KEY,
+                subkey=KEY.subkeys[0],
+                machine_desc='expire:long',
+                long_desc='',
+            ),
+        ],
+        'glep63-1-strict': [
+            SubKeyWarning(
+                key=KEY,
+                subkey=KEY.subkeys[0],
+                machine_desc='expire:long',
+                long_desc='',
+            ),
+        ],
         'glep63-2': [],
         'glep63-2-draft-20180707': [],
+        'glep63-2.1': [],
     }
 
 
@@ -661,38 +1001,51 @@ class SubKeyOneWeekExpirationTest(tests.key_base.BaseKeyTest):
     KEY_FILE = 'expiration/subkey-1w.gpg'
 
     GPG_COLONS = '''
-pub:-:4096:1:CFD4B3EC01FB9A51:1533210309:1596283281::-:::scSC::::::23::0:
-fpr:::::::::8386FCEB4CE07C9FA30F9E71CFD4B3EC01FB9A51:
-uid:-::::1533211281::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <nobody@gentoo.org>::::::::::0:
-sub:-:4096:1:14F0813D42225877:1533210363:1533816201:::::s::::::23:
-fpr:::::::::693AE5F2C1CCE7CA30FF07F214F0813D42225877:
+tru::1:1556681170:1560354194:3:1:5
+pub:-:4096:1:0F2446E70C90BD31:1533247200:1564783207::-:::cESC::::::23::0:
+fpr:::::::::4D94D1CD1D552073A6579CE70F2446E70C90BD31:
+uid:-::::1533247207::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <nobody@gentoo.org>::::::::::0:
+sub:-:4096:1:3F911DBFC4B51F74:1533247201:1533852011:::::s::::::23:
+fpr:::::::::26BF2B75CB42D5803C615AF43F911DBFC4B51F74:
+sub:-:4096:1:44C9C2CFA6974493:1533247201:1533852011:::::e::::::23:
+fpr:::::::::CF8439AF79B439E0D9D7C99B44C9C2CFA6974493:
 '''
 
     KEY = PublicKey(
         validity=Validity.NO_VALUE,
         key_length=4096,
         key_algo=KeyAlgo.RSA,
-        keyid='CFD4B3EC01FB9A51',
-        creation_date=datetime.datetime(2018, 8, 2, 11, 45, 9),
-        expiration_date=datetime.datetime(2020, 8, 1, 12, 1, 21),
-        key_caps='scSC',
+        keyid='0F2446E70C90BD31',
+        creation_date=datetime.datetime(2018, 8, 2, 22, 0),
+        expiration_date=datetime.datetime(2019, 8, 2, 22, 0, 7),
+        key_caps='cESC',
         curve='',
         subkeys=[
             Key(
                 validity=Validity.NO_VALUE,
                 key_length=4096,
                 key_algo=KeyAlgo.RSA,
-                keyid='14F0813D42225877',
-                creation_date=datetime.datetime(2018, 8, 2, 11, 46, 3),
-                expiration_date=datetime.datetime(2018, 8, 9, 12, 3, 21),
+                keyid='3F911DBFC4B51F74',
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 1),
+                expiration_date=datetime.datetime(2018, 8, 9, 22, 0, 11),
                 key_caps='s',
+                curve='',
+            ),
+            Key(
+                validity=Validity.NO_VALUE,
+                key_length=4096,
+                key_algo=KeyAlgo.RSA,
+                keyid='44C9C2CFA6974493',
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 1),
+                expiration_date=datetime.datetime(2018, 8, 9, 22, 0, 11),
+                key_caps='e',
                 curve='',
             ),
         ],
         uids=[
             UID(
                 validity=Validity.NO_VALUE,
-                creation_date=datetime.datetime(2018, 8, 2, 12, 1, 21),
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 7),
                 expiration_date=None,
                 uid_hash='0DAFDC73F43FC173C2216BA2BB4928391676BF2F',
                 user_id='GLEP63 test key <nobody@gentoo.org>',
@@ -700,58 +1053,99 @@ fpr:::::::::693AE5F2C1CCE7CA30FF07F214F0813D42225877:
         ],
     )
 
-    COMMON_ISSUE = SubKeyWarning(
-        key=KEY,
-        subkey=KEY.subkeys[0],
-        machine_desc='expire:short',
-        long_desc='',
-    )
-
     EXPECTED_RESULTS = {
-        'glep63-1-rsa2048': [COMMON_ISSUE],
-        'glep63-1-rsa2048-ec25519': [COMMON_ISSUE],
-        'glep63-1-strict': [COMMON_ISSUE],
-        'glep63-2': [COMMON_ISSUE],
-        'glep63-2-draft-20180707': [COMMON_ISSUE],
+        'glep63-1-rsa2048': [
+            SubKeyWarning(
+                key=KEY,
+                subkey=KEY.subkeys[0],
+                machine_desc='expire:short',
+                long_desc='',
+            ),
+        ],
+        'glep63-1-rsa2048-ec25519': [
+            SubKeyWarning(
+                key=KEY,
+                subkey=KEY.subkeys[0],
+                machine_desc='expire:short',
+                long_desc='',
+            ),
+        ],
+        'glep63-1-strict': [
+            SubKeyWarning(
+                key=KEY,
+                subkey=KEY.subkeys[0],
+                machine_desc='expire:short',
+                long_desc='',
+            ),
+        ],
+        'glep63-2': [
+            SubKeyIssue(
+                key=KEY,
+                subkey=KEY.subkeys[0],
+                machine_desc='expire:short',
+                long_desc='',
+            ),
+        ],
+        'glep63-2-draft-20180707': [
+            SubKeyIssue(
+                key=KEY,
+                subkey=KEY.subkeys[0],
+                machine_desc='expire:short',
+                long_desc='',
+            ),
+        ],
+        'glep63-2.1': [
+            SubKeyIssue(
+                key=KEY,
+                subkey=KEY.subkeys[0],
+                machine_desc='expire:short',
+                long_desc='',
+            ),
+            SubKeyIssue(
+                key=KEY,
+                subkey=KEY.subkeys[1],
+                machine_desc='expire:short',
+                long_desc='',
+            ),
+        ],
     }
 
 
 class TwoSubKeysExpirationTest(tests.key_base.BaseKeyTest):
-    """
-    Test that short expiration date is reported only as a warning
-    when there is another good subkey.
-    """
-
     KEY_FILE = 'expiration/two-subkeys-1w-1y.gpg'
 
     GPG_COLONS = '''
 tru::1:1556681170:1560354194:3:1:5
-pub:-:4096:1:EA63F5448ACC3D97:1533247200:1596276000::-:::scSC::::::23::0:
-fpr:::::::::09AC1FCE757E723FEEE86ED4EA63F5448ACC3D97:
-uid:-::::1533247200::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <nobody@gentoo.org>::::::::::0:
-sub:-:4096:1:86D256F5CEBB9574:1533247200:1533808800:::::s::::::23:
-fpr:::::::::AC2C1A73378FEA607A27935586D256F5CEBB9574:
-sub:-:4096:1:68E71E6FE90C1D16:1533247200:1564783200:::::s::::::23:
-fpr:::::::::EE8878F15B1A9478AE8D354268E71E6FE90C1D16:
+pub:-:4096:1:0F2446E70C90BD31:1533247200:1564783207::-:::cESC::::::23::0:
+fpr:::::::::4D94D1CD1D552073A6579CE70F2446E70C90BD31:
+uid:-::::1533247207::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <nobody@gentoo.org>::::::::::0:
+sub:-:4096:1:3F911DBFC4B51F74:1533247201:1533852011:::::s::::::23:
+fpr:::::::::26BF2B75CB42D5803C615AF43F911DBFC4B51F74:
+sub:-:4096:1:44C9C2CFA6974493:1533247201:1533852011:::::e::::::23:
+fpr:::::::::CF8439AF79B439E0D9D7C99B44C9C2CFA6974493:
+sub:-:4096:1:88580872B51C08B9:1533247212:1564783212:::::s::::::23:
+fpr:::::::::3D36B68F75BA09167B32CF0C88580872B51C08B9:
+sub:-:4096:1:2D927DAC6A85C6BD:1533247212:1564783212:::::e::::::23:
+fpr:::::::::F216FC6F6C4EC3AD4DE4A4AF2D927DAC6A85C6BD:
 '''
 
     KEY = PublicKey(
         validity=Validity.NO_VALUE,
         key_length=4096,
         key_algo=KeyAlgo.RSA,
-        keyid='EA63F5448ACC3D97',
+        keyid='0F2446E70C90BD31',
         creation_date=datetime.datetime(2018, 8, 2, 22, 0),
-        expiration_date=datetime.datetime(2020, 8, 1, 10, 0),
-        key_caps='scSC',
+        expiration_date=datetime.datetime(2019, 8, 2, 22, 0, 7),
+        key_caps='cESC',
         curve='',
         subkeys=[
             Key(
                 validity=Validity.NO_VALUE,
                 key_length=4096,
                 key_algo=KeyAlgo.RSA,
-                keyid='86D256F5CEBB9574',
-                creation_date=datetime.datetime(2018, 8, 2, 22, 0),
-                expiration_date=datetime.datetime(2018, 8, 9, 10, 0),
+                keyid='3F911DBFC4B51F74',
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 1),
+                expiration_date=datetime.datetime(2018, 8, 9, 22, 0, 11),
                 key_caps='s',
                 curve='',
             ),
@@ -759,17 +1153,37 @@ fpr:::::::::EE8878F15B1A9478AE8D354268E71E6FE90C1D16:
                 validity=Validity.NO_VALUE,
                 key_length=4096,
                 key_algo=KeyAlgo.RSA,
-                keyid='68E71E6FE90C1D16',
-                creation_date=datetime.datetime(2018, 8, 2, 22, 0),
-                expiration_date=datetime.datetime(2019, 8, 2, 22, 0),
+                keyid='44C9C2CFA6974493',
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 1),
+                expiration_date=datetime.datetime(2018, 8, 9, 22, 0, 11),
+                key_caps='e',
+                curve='',
+            ),
+            Key(
+                validity=Validity.NO_VALUE,
+                key_length=4096,
+                key_algo=KeyAlgo.RSA,
+                keyid='88580872B51C08B9',
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 12),
+                expiration_date=datetime.datetime(2019, 8, 2, 22, 0, 12),
                 key_caps='s',
+                curve='',
+            ),
+            Key(
+                validity=Validity.NO_VALUE,
+                key_length=4096,
+                key_algo=KeyAlgo.RSA,
+                keyid='2D927DAC6A85C6BD',
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 12),
+                expiration_date=datetime.datetime(2019, 8, 2, 22, 0, 12),
+                key_caps='e',
                 curve='',
             ),
         ],
         uids=[
             UID(
                 validity=Validity.NO_VALUE,
-                creation_date=datetime.datetime(2018, 8, 2, 22, 0),
+                creation_date=datetime.datetime(2018, 8, 2, 22, 0, 7),
                 expiration_date=None,
                 uid_hash='0DAFDC73F43FC173C2216BA2BB4928391676BF2F',
                 user_id='GLEP63 test key <nobody@gentoo.org>',
@@ -814,6 +1228,20 @@ fpr:::::::::EE8878F15B1A9478AE8D354268E71E6FE90C1D16:
             SubKeyWarning(
                 key=KEY,
                 subkey=KEY.subkeys[0],
+                machine_desc='expire:short',
+                long_desc='',
+            ),
+        ],
+        'glep63-2.1': [
+            SubKeyWarning(
+                key=KEY,
+                subkey=KEY.subkeys[0],
+                machine_desc='expire:short',
+                long_desc='',
+            ),
+            SubKeyWarning(
+                key=KEY,
+                subkey=KEY.subkeys[1],
                 machine_desc='expire:short',
                 long_desc='',
             ),

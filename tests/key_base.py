@@ -17,7 +17,7 @@ from glep63.specs import (SPECS,)
 
 class FakeTimePopen(subprocess.Popen):
     def __init__(self, cmd, *args, **kwargs):
-        cmd = ['faketime', '-f', '2018-08-03 00:00:00'] + cmd
+        cmd = ['faketime', '-f', '2018-08-03 00:01:00'] + cmd
         try:
             return super(FakeTimePopen, self).__init__(cmd, *args, **kwargs)
         except FileNotFoundError:
