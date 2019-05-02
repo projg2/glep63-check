@@ -1,5 +1,5 @@
 # glep63-check -- key checking procedure
-# (c) 2018 Michał Górny
+# (c) 2018-2019 Michał Górny
 # Released under the terms of 2-clause BSD license.
 
 import datetime
@@ -7,7 +7,7 @@ import email.utils
 import functools
 
 from glep63.base import (FAIL, WARN, KeyAlgo, Validity, KeyIssue,
-        SubKeyIssue, UIDIssue)
+        SubKeyIssue, SubKeyWarning, UIDIssue)
 
 
 def check_subkey(k, spec, key_type, issue_params):
@@ -125,26 +125,44 @@ def check_key(k, spec):
     # (sadly, we can't be sure *which* subkey is used for Gentoo,
     #  so we complain about all of them)
     has_signing_subkey = False
+    good_keys_by_type = {'a': [], 'e': [], 's': []}
     for sk in k.subkeys:
+        result = []
+
         # check only signing subkeys
         if 's' not in sk.key_caps:
             continue
         # complain about invalid subkeys
         if sk.validity == Validity.INVALID:
-            out.append(SubKeyIssue(k, sk, 'validity:invalid',
+            result.append(SubKeyIssue(k, sk, 'validity:invalid',
                 'Subkey is invalid'))
         # skip expired and revoked subkeys
         if sk.validity in (Validity.REVOKED, Validity.EXPIRED):
             continue
 
         if len(sk.key_caps) > 1 and spec.get('subkey:multipurpose'):
-            out.append(spec['subkey:multipurpose'].subkey(k, sk, 'subkey:multipurpose',
+            result.append(spec['subkey:multipurpose'].subkey(k, sk, 'subkey:multipurpose',
                 'Subkey has multiple capabilities enabled (has: [{}]; use dedicated subkeys!)'
                 .format(sk.key_caps)))
         else:
             has_signing_subkey = True
 
-        out.extend(check_subkey(sk, spec, 'subkey', (k, sk)))
+        result += check_subkey(sk, spec, 'subkey', (k, sk))
+        # check whether the subkey had any issues; if not, add it
+        # to the list of good subkeys
+        for r in result:
+            if isinstance(r, SubKeyIssue):
+                break
+        else:
+            for c in sk.key_caps:
+                good_keys_by_type[c].append(sk)
+        out += result
+
+    # make subkey:expire non-fatal if there is at least one good subkey
+    if good_keys_by_type['s']:
+        for i, r in enumerate(out):
+            if isinstance(r, SubKeyIssue) and r.machine_desc == 'expire:short':
+                out[i] = SubKeyWarning(*r)
 
     if not has_signing_subkey and spec.get('subkey:none'):
         out.append(spec['subkey:none'].key(k, 'subkey:none',
