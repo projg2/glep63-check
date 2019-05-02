@@ -7,7 +7,7 @@ from distutils.core import setup
 
 setup(
     name='glep63-check',
-    version='7',
+    version='8',
     author='Michał Górny',
     author_email='mgorny@gentoo.org',
     url='http://github.com/mgorny/glep63-verify',
