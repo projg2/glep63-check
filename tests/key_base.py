@@ -62,6 +62,8 @@ def get_gnupg_version():
 
 
 class BaseKeyTest(unittest.TestCase):
+    maxDiff = None
+
     def test_key_class(self):
         """
         Test the key using predefined Key class.
