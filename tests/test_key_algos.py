@@ -653,18 +653,18 @@ class ED25519Test(tests.key_base.BaseKeyTest):
 
     GPG_COLONS = '''
 tru::1:1556681170:1560354194:3:1:5
-pub:-:256:22:13447F0775EF5B7F:1533247200:1564783200::-:::cESC:::::ed25519:::0:
+pub:-:255:22:13447F0775EF5B7F:1533247200:1564783200::-:::cESC:::::ed25519:::0:
 fpr:::::::::5A4891EDB747391F18D42EA913447F0775EF5B7F:
 uid:-::::1533247200::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <nobody@gentoo.org>::::::::::0:
-sub:-:256:22:80D111D2FB1375A7:1533247200:1564783200:::::s:::::ed25519::
+sub:-:255:22:80D111D2FB1375A7:1533247200:1564783200:::::s:::::ed25519::
 fpr:::::::::D0867191FFAEA9EBAF6AF7F880D111D2FB1375A7:
-sub:-:256:18:B3F692723809542E:1533247200:1564783200:::::e:::::cv25519::
+sub:-:255:18:B3F692723809542E:1533247200:1564783200:::::e:::::cv25519::
 fpr:::::::::1C9B67F422DEE6C6C557B186B3F692723809542E:
 '''
 
     KEY = PublicKey(
         validity=Validity.NO_VALUE,
-        key_length=256,
+        key_length=255,
         key_algo=KeyAlgo.EDDSA,
         keyid='13447F0775EF5B7F',
         creation_date=datetime.datetime(2018, 8, 2, 22, 0),
@@ -674,7 +674,7 @@ fpr:::::::::1C9B67F422DEE6C6C557B186B3F692723809542E:
         subkeys=[
             Key(
                 validity=Validity.NO_VALUE,
-                key_length=256,
+                key_length=255,
                 key_algo=KeyAlgo.EDDSA,
                 keyid='80D111D2FB1375A7',
                 creation_date=datetime.datetime(2018, 8, 2, 22, 0),
@@ -684,7 +684,7 @@ fpr:::::::::1C9B67F422DEE6C6C557B186B3F692723809542E:
             ),
             Key(
                 validity=Validity.NO_VALUE,
-                key_length=256,
+                key_length=255,
                 key_algo=KeyAlgo.ECDH,
                 keyid='B3F692723809542E',
                 creation_date=datetime.datetime(2018, 8, 2, 22, 0),
