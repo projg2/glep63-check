@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-# (C) 2018 Michał Górny <mgorny@gentoo.org>
+# (C) 2018-2022 Michał Górny <mgorny@gentoo.org>
 # Released under the terms of the 2-clause BSD license.
 
-from distutils.core import setup
+from setuptools import setup
 
 
 setup(
@@ -13,7 +13,11 @@ setup(
     url='http://github.com/mgorny/glep63-verify',
 
     packages=['glep63'],
-    scripts=['glep63-check'],
+    entry_points={
+        'console_scripts': [
+            'glep63-check=glep63.__main__:entry_point',
+        ],
+    },
 
     classifiers=[
         'Development Status :: 5 - Production/Stable',
