@@ -18,7 +18,7 @@ tru::1:1556681170:1560354194:3:1:5
 pub:e:4096:1:DB44A8BC23B67AF4:946681246:946767646::-:::sc::::::23::0:
 fpr:::::::::723AADD29743D410B5CAD9CEDB44A8BC23B67AF4:
 uid:e::::946681246::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <nobody@gentoo.org>::::::::::0:
-sub:e:4096:1:D4E7C940C84DD0DA:946681260:1545865383:::::s::::::23:
+sub:e:4096:1:D4E7C940C84DD0DA:946681260:946767646:::::s::::::23:
 fpr:::::::::A23A271C81A008C088BB0A2CD4E7C940C84DD0DA:
 '''
 
@@ -38,7 +38,7 @@ fpr:::::::::A23A271C81A008C088BB0A2CD4E7C940C84DD0DA:
                 key_algo=KeyAlgo.RSA,
                 keyid='D4E7C940C84DD0DA',
                 creation_date=datetime.datetime(1999, 12, 31, 23, 1),
-                expiration_date=datetime.datetime(2018, 12, 26, 23, 3, 3),
+                expiration_date=datetime.datetime(2000, 1, 1, 23, 0, 46),
                 key_caps='s',
                 curve='',
             ),
@@ -108,7 +108,7 @@ tru::1:1556681170:1560354194:3:1:5
 pub:r:4096:1:CD407D01E7D00880:946682289:978218289::-:::sc::::::23::0:
 fpr:::::::::F0769AC027B2117ECFAB7F1BCD407D01E7D00880:
 uid:r::::946682289::0DAFDC73F43FC173C2216BA2BB4928391676BF2F::GLEP63 test key <nobody@gentoo.org>::::::::::0:
-sub:r:4096:1:F9FDA2910B574DA4:946682301:978218301:::::s::::::23:
+sub:r:4096:1:F9FDA2910B574DA4:946682301:978218289:::::s::::::23:
 fpr:::::::::A76730D5141B96EFAA7B3E4AF9FDA2910B574DA4:
 '''
 
@@ -128,7 +128,7 @@ fpr:::::::::A76730D5141B96EFAA7B3E4AF9FDA2910B574DA4:
                 key_algo=KeyAlgo.RSA,
                 keyid='F9FDA2910B574DA4',
                 creation_date=datetime.datetime(1999, 12, 31, 23, 18, 21),
-                expiration_date=datetime.datetime(2000, 12, 30, 23, 18, 21),
+                expiration_date=datetime.datetime(2000, 12, 30, 23, 18, 9),
                 key_caps='s',
                 curve='',
             ),
