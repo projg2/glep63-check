@@ -167,12 +167,12 @@ def check_key(k, spec):
                 good_keys_by_type[c].append(sk)
         out += result
 
-    # make subkey:expire non-fatal if there is at least one good subkey
+    # For each subkey type, if there is at least one good subkey, downgrade any
+    # issues in other subkeys to warnings
     for t in spec['__subkey_types__']:
         if good_keys_by_type[t]:
             for i, r in enumerate(out):
                 if (isinstance(r, SubKeyIssue)
-                        and r.machine_desc == 'expire:short'
                         and r.subkey.key_caps == t):
                     out[i] = SubKeyWarning(*r)
 
